@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Reply.hpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pablgarc <pablgarc@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/05 22:08:29 by pablgarc          #+#    #+#             */
+/*   Updated: 2026/03/05 22:08:29 by pablgarc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #ifndef REPLY_HPP
 #define REPLY_HPP
 
@@ -42,7 +53,7 @@ namespace Reply
     // Errores
     Message errUnknownMode(const std::string &nick, const std::string &channel, const std::string &mode);
     Message errUnknownCommand(const std::string &nick, const std::string &command);
-    Message errNoNicknameGiven();
+    Message errNoNicknameGiven(const std::string &nick);
     Message errErroneousNickname(const std::string &nick, const std::string &badnick);
     Message errNicknameInUse(const std::string &nick, const std::string &badnick);
     Message errNoSuchNick(const std::string &nick, const std::string &badnick);

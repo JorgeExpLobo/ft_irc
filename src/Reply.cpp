@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Reply.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/05 22:08:29 by pablo             #+#    #+#             */
+/*   Updated: 2026/03/05 22:20:25 by pablo            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Reply.hpp"
 #include "ChannelMock.hpp"
 
@@ -189,10 +201,11 @@ Message errUnknownCommand(const std::string &nick, const std::string &command)
                     .pushSuffix("Unknown command");
 }
 
-Message errNoNicknameGiven() 
+Message errNoNicknameGiven(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(431)
+                    .pushArg(nick)
                     .pushSuffix("No nickname given");
 }
 

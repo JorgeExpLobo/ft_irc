@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Message.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/05 22:14:16 by pablo             #+#    #+#             */
+/*   Updated: 2026/03/05 22:21:39 by pablo            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
 #include <string>       // std::string
-#include <cstdint>      // uint16_t
+#include <stdint.h>      // uint16_t
 
 
 #define SERVER_NAME "irc.42madrid.com"
