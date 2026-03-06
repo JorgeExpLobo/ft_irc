@@ -14,6 +14,8 @@
 # define SERVER_HPP
 
 # include "Client.hpp"
+# include "Channel.hpp"
+# include "CommandManager.hpp"
 # include <iostream>
 # include <vector>
 # include <map>
@@ -38,7 +40,7 @@ private:
 	
 	// Cambiar por std::map<int, Client*> cuando este la clase Client, es decir, con punteros
 	std::map<int, Client*>	_clients;
-	// std::vector<Channel*>    _channels;
+	std::vector<Channel*> _channels;
 
 	// Métodos internos (Engine)
 	void	establishNewConnection();
@@ -53,6 +55,9 @@ private:
 	// Helper para buscar canales (retorna void* mientras no tenga Channel.hpp)
 	void*	findChannel(std::string name);
 
+	// Manager de comandos
+	CommandManager _commandManager;
+
 public:
 	Server(int port, std::string password);
 	~Server();
@@ -64,6 +69,12 @@ public:
 	// Getters básicos (útiles para el CommandHandler si finalmente se hace)
 	int			getPort() const { return _port; }
 	std::string	getPassword() const { return _password; }
+
+	// Funciones para los channels:
+	Channel* getChannel(const std::string& name);
+	void addChannel(Channel* chan);
+	void removeChannel(const std::string& name);
+	Client* getClientByNick(const std::string& nick);
 };
 
 // Declaración del handler de señales (va fuera de la clase)

@@ -66,6 +66,18 @@ void Server::init() {
 	_poll_fds.push_back(master_pfd);
 
 	_is_running = true;
+	_commandManager.registerCommand("PASS", new PassCommand());
+	_commandManager.registerCommand("NICK", new NickCommand());
+	_commandManager.registerCommand("USER", new UserCommand());
+	_commandManager.registerCommand("JOIN", new JoinCommand());
+	_commandManager.registerCommand("PART", new PartCommand());
+	_commandManager.registerCommand("PRIVMSG", new PrivmsgCommand());
+	_commandManager.registerCommand("QUIT", new QuitCommand());
+	_commandManager.registerCommand("INVITE", new InviteCommand());
+	_commandManager.registerCommand("KICK", new KickCommand());
+	_commandManager.registerCommand("TOPIC", new TopicCommand());
+	_commandManager.registerCommand("MODE", new ModeCommand());
+	_commandManager.registerCommand("AWAY", new AwayCommand());
 	std::cout << "--- Servidor IRC 'The Engine' iniciado ---" << std::endl;
 	std::cout << "Puerto: " << _port << " | Password: " << _password << std::endl;
 }
@@ -139,11 +151,8 @@ void Server::processIncomingData(int fd) {
 		_clients[fd]->appendBuffer(read_buffer);
 
 
-		// --- PROCESAR COMANDOS (uso puntero por comodidad para lectura) ---
-		// Usando lógica actual:
+		// --- PROCESAR COMANDOS ---
 		std::string& current_buffer = _clients[fd]->getBuffer();
-		// Futura clase Client:
-		// std::string& current_buffer = _clients_map[fd]->getRawBuffer();
 
 		size_t newline_pos;
 		while ((newline_pos = current_buffer.find("\n")) != std::string::npos) {
@@ -152,21 +161,14 @@ void Server::processIncomingData(int fd) {
 			if (!raw_command.empty() && raw_command[raw_command.size() - 1] == '\r')
 				raw_command.erase(raw_command.size() - 1);
 			
-			this->executeIrcCommand(fd, raw_command);
+			// Lógica de parseo y ejecución de comandos
+			Message msg;
+			if (!msg.parseRequest(raw_command))
+				return;
+			_commandManager.execute(this, _clients[fd], msg);
 			current_buffer.erase(0, newline_pos + 1);
 		}
 	}
-}
-
-void Server::executeIrcCommand(int fd, std::string cmd_line) {
-	if (cmd_line.empty()) return;
-	
-	std::cout << "[LOG] FD " << fd << " envió: " << cmd_line << std::endl;
-	
-	// --- PARSER ---
-	// Aquí es donde llamo a CommandHandler (veremos). Por ahora, ECO:
-	std::string response = "Engine recibió: " + cmd_line + "\r\n";
-	send(fd, response.c_str(), response.size(), 0);
 }
 
 void Server::terminateClientConnection(int fd) {

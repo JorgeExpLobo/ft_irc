@@ -117,14 +117,14 @@ Message nameReply(const std::string &nick, const Channel &chan)
     std::string names;
 	const std::set<Client*>& users = chan.getClients();
 
-    for (std::list<Channel::UserEntry>::const_iterator it = users.begin(); it != users.end(); ++it)
+    for (std::list<Client*>::const_iterator it = users.begin(); it != users.end(); ++it)
     {
         if (it != users.begin())
             names.append(" ");
         if (chan.isOperator(*it) )
             names.append("@");
 
-        names.append(it->user->nickname);
+        names.append((*it)->getNickname());
     }
 
     return Message().setPrefix(SERVER_NAME)
