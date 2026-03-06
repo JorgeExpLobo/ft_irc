@@ -49,6 +49,16 @@ const std::set<Client*>& Channel::getClients() const
 	return _clients;
 }
 
+bool Channel::isEmpty() const
+{
+	return _clients.empty();
+}
+
+size_t Channel::getClientCount() const
+{
+	return _clients.size();
+}
+
 void Channel::addOperator(Client* client)
 {
 	_operators.insert(client);

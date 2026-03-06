@@ -43,7 +43,9 @@ NAME					:=	ircserv
 HEADER					:=	$(DIR_INC)Server.hpp
 
 SRC						:=	main.cpp \
-							Server.cpp
+							Server.cpp \
+							Client.cpp \
+							Channel.cpp \
 
 OBJ						:=	$(addprefix $(DIR_OBJ), $(SRC:cpp=o))
 

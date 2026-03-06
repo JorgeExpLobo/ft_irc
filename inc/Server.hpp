@@ -13,6 +13,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "Client.hpp"
 # include <iostream>
 # include <vector>
 # include <map>
@@ -25,13 +26,6 @@
 # include <cstring>
 # include <algorithm>
 
-// Estructura temporal para testeo (será sustituida por class Client)
-struct Client {
-	int		 fd;
-	std::string buffer;
-	// Aqui podria añadir: std::string nickname;
-};
-
 class Server {
 private:
 	int							_port;
@@ -43,7 +37,7 @@ private:
 	std::vector<struct pollfd>	_poll_fds;
 	
 	// Cambiar por std::map<int, Client*> cuando este la clase Client, es decir, con punteros
-	std::map<int, Client>	_clients;
+	std::map<int, Client*>	_clients;
 	// std::vector<Channel*>    _channels;
 
 	// Métodos internos (Engine)

@@ -34,6 +34,8 @@ class Channel
 		void removeClient(Client* client);
 		bool hasClient(Client* client) const;
 		const std::set<Client*>& getClients() const;
+		bool isEmpty() const;
+		size_t getClientCount() const;
 
 		void addOperator(Client* client);
 		void removeOperator(Client* client);

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/Server.hpp"
+#include "Server.hpp"
 #include <cstdio>
 #include <cerrno>
 #include <csignal> // Para manejar señales
@@ -112,10 +112,9 @@ void Server::establishNewConnection() {
 		_poll_fds.push_back(client_pfd);
 
 		// --- GESTIÓN DE CLIENTE ---
-		// Actualmente usando struct/map Client para testing:
-		Client new_node;
-		new_node.fd = new_client_fd;
-		_clients[new_client_fd] = new_node;
+		
+		Client* new_client = new Client(new_client_fd, "localhost");
+		_clients[new_client_fd] = new_client;
 		
 		// Futura implementación con clase Client +-:
 		// Client* new_client = new Client(new_client_fd);
@@ -137,14 +136,12 @@ void Server::processIncomingData(int fd) {
 		read_buffer[bytes_received] = '\0';
 		
 		// --- GESTIÓN DE BUFFER ---
-		// Usando string temporal del map:
-		_clients[fd].buffer += read_buffer;
-		// Map con futura clase Client (puntero):
-		// _clients_map[fd]->appendInputBuffer(read_buffer);
+		_clients[fd]->appendBuffer(read_buffer);
+
 
 		// --- PROCESAR COMANDOS (uso puntero por comodidad para lectura) ---
 		// Usando lógica actual:
-		std::string& current_buffer = _clients[fd].buffer;
+		std::string& current_buffer = _clients[fd]->getBuffer();
 		// Futura clase Client:
 		// std::string& current_buffer = _clients_map[fd]->getRawBuffer();
 
@@ -183,8 +180,8 @@ void Server::terminateClientConnection(int fd) {
 	close(fd);
 	
 	// Eliminar de la lista de clientes del servidor
+	delete _clients[fd];
 	_clients.erase(fd);
-	// Si uso punteros a clase Client: delete _clients_map[fd]; _clients_map.erase(fd); (creo, revisar)
 
 	// Eliminar del vector de poll para que el loop no lo procese más
 	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {

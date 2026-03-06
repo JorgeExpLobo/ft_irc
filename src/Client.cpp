@@ -1,14 +1,24 @@
 #include "../inc/Client.hpp"
 #include "../inc/Channel.hpp"
 
+Client::Client() 
+		: _fd(-1),
+		_has_pass(false),
+		_has_nick(false),
+		_has_user(false),
+		_registered(false),
+		_away(false)
+{
+}
+
 Client::Client(int fd, const std::string& host)
-	: _fd(fd),
-	  _host(host),
-	  _has_pass(false),
-	  _has_nick(false),
-	  _has_user(false),
-	  _registered(false),
-	  _away(false)
+		: _fd(fd),
+		_host(host),
+		_has_pass(false),
+		_has_nick(false),
+		_has_user(false),
+		_registered(false),
+		_away(false)
 {
 }
 
@@ -17,6 +27,11 @@ Client::~Client() {}
 int Client::getFd() const
 {
 	return _fd;
+}
+
+void Client::setFd(int fd)
+{
+	_fd = fd;
 }
 
 const std::string& Client::getNickname() const
@@ -70,6 +85,11 @@ void Client::appendBuffer(const std::string& data)
 std::string& Client::getBuffer()
 {
 	return _buffer;
+}
+
+std::string Client::getPrefix() const
+{
+	return _nickname + "!" + _username + "@" + _host;
 }
 
 void Client::joinChannel(Channel* channel)

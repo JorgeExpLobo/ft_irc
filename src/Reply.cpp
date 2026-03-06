@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "Reply.hpp"
-#include "ChannelMock.hpp"
+#include "Channel.hpp"
 
 //:<server> <reply-code> <target> <args...> :<mensaje>
 //:irc.42madrid.com 401 pablgarc usuario :No such nick/channel
@@ -114,24 +114,15 @@ Message nowAway()
 // Names
 Message nameReply(const std::string &nick, const Channel &chan) 
 {
-    std::string spec;
-    if (chan.modes.isPrivate)
-        spec = "*";
-    else if (chan.modes.isSecret)
-        spec = "@";
-    else
-        spec = "=";
-
     std::string names;
-    for (std::list<Channel::UserEntry>::const_iterator it = chan.joinedUsers.begin(); it != chan.joinedUsers.end(); ++it)
-    {
-        if (it != chan.joinedUsers.begin())
-            names.append(" ");
+	const std::set<Client*>& users = chan.getClients();
 
-        if (it->flags.isOperator)
+    for (std::list<Channel::UserEntry>::const_iterator it = users.begin(); it != users.end(); ++it)
+    {
+        if (it != users.begin())
+            names.append(" ");
+        if (chan.isOperator(*it) )
             names.append("@");
-        else if (it->flags.hasVoicePriviledge)
-            names.append("+");
 
         names.append(it->user->nickname);
     }
@@ -139,8 +130,8 @@ Message nameReply(const std::string &nick, const Channel &chan)
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(353)
                     .pushArg(nick)
-                    .pushArg(spec)
-                    .pushArg(chan.name)
+                    .pushArg("=")
+                    .pushArg(chan.getName())
                     .pushSuffix(names);
 }
 

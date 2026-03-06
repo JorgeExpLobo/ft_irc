@@ -26,9 +26,11 @@ class Client
 		std::string _awayMessage;
 
 	public:
+		Client();
 		Client(int fd, const std::string& host);
 		~Client();
 
+		void setFd(int fd);
 		int getFd() const;
 		const std::string& getNickname() const;
 		const std::string& getUsername() const;
@@ -42,6 +44,8 @@ class Client
 
 		void appendBuffer(const std::string& data);
 		std::string& getBuffer();
+
+		std::string getPrefix() const;
 
 		void joinChannel(Channel* channel);
 		void leaveChannel(Channel* channel);
