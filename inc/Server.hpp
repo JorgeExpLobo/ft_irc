@@ -38,22 +38,16 @@ private:
 	// Gestion de conexiones
 	std::vector<struct pollfd>	_poll_fds;
 	
-	// Cambiar por std::map<int, Client*> cuando este la clase Client, es decir, con punteros
 	std::map<int, Client*>	_clients;
 	std::vector<Channel*> _channels;
 
 	// Métodos internos (Engine)
 	void	establishNewConnection();
 	void	processIncomingData(int fd);
-	void	terminateClientConnection(int fd);
 
 	// Gestion del chat IRC
 	void	executeIrcCommand(int fd, std::string cmd_line);
 	void	removeClientFromAllChannels(int fd);
-	void	broadcastToChannel(std::string message, std::string channel_name, int exclude_fd);
-
-	// Helper para buscar canales (retorna void* mientras no tenga Channel.hpp)
-	void*	findChannel(std::string name);
 
 	// Manager de comandos
 	CommandManager _commandManager;
@@ -70,11 +64,25 @@ public:
 	int			getPort() const { return _port; }
 	std::string	getPassword() const { return _password; }
 
-	// Funciones para los channels:
+	// CHANNEL MANAGEMENT
+
 	Channel* getChannel(const std::string& name);
-	void addChannel(Channel* chan);
+	Channel* createChannel(const std::string& name, Client* creator);
+	Channel* getOrCreateChannel(const std::string& name, Client* creator);
 	void removeChannel(const std::string& name);
-	Client* getClientByNick(const std::string& nick);
+	void addClientToChannel(Client* client, const std::string& channel_name);
+	void removeClientFromChannel(Client* client, const std::string& channel_name);
+	void terminateClientConnection(int fd);
+
+	// MESSAGE HELPERS
+
+	void sendToClient(Client* client, const std::string& message);
+	void broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd);
+
+	// FUNCIONES AUXILIARES PARA COMANDOS
+	bool nickExists(const std::string& nick) const;
+	Channel* findChannel(const std::string& name);
+	Client* findClient(const std::string& nickname);
 };
 
 // Declaración del handler de señales (va fuera de la clase)

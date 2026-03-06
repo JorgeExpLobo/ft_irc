@@ -51,7 +51,6 @@ Message &Message::operator=(const Message &other)
 
 Message::~Message() {}
 
-
 /*
  formatShort()
 
@@ -270,3 +269,32 @@ const std::string &Message::suffix() const {return _args[_argsCount - 1]; }
 bool Message::isRequest() const { return _isRequest; }
 bool Message::hasSuffix() const { return _hasSuffix; }
 uint16_t Message::replyCode() const { return _replyCode; }
+
+// Implementación para funciones auxiliares para los comandos
+
+std::string Message::getCommand() const
+{
+    return _command;
+}
+
+const std::string& Message::getArg(int i) const
+{
+    return _args[i];
+}
+
+int Message::getArgCount() const
+{
+    return _argsCount;
+}
+
+std::string Message::getTrailing() const
+{
+    if (_hasSuffix)
+        return suffix();
+    return "";
+}
+
+std::string Message::toString() const
+{
+    return stringify();
+}

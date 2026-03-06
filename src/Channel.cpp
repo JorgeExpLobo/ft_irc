@@ -31,6 +31,11 @@ void Channel::setTopic(const std::string& topic)
 void Channel::addClient(Client* client)
 {
 	_clients.insert(client);
+	std::cout << "[CHANNEL] "
+			  << client->getNickname()
+			  << " joined "
+			  << _name
+			  << std::endl;
 }
 
 void Channel::removeClient(Client* client)

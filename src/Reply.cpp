@@ -12,7 +12,8 @@
 
 #include "Reply.hpp"
 #include "Channel.hpp"
-
+#include "Client.hpp"
+#include <set>
 //:<server> <reply-code> <target> <args...> :<mensaje>
 //:irc.42madrid.com 401 pablgarc usuario :No such nick/channel
 //:irc.42madrid.com 461 pablgarc PRIVMSG :Not enough parameters
@@ -117,7 +118,7 @@ Message nameReply(const std::string &nick, const Channel &chan)
     std::string names;
 	const std::set<Client*>& users = chan.getClients();
 
-    for (std::list<Client*>::const_iterator it = users.begin(); it != users.end(); ++it)
+    for (std::set<Client*>::const_iterator it = users.begin(); it != users.end(); ++it)
     {
         if (it != users.begin())
             names.append(" ");

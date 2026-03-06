@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <sys/socket.h>
 #include "ACommand.hpp"
 
 class Server;

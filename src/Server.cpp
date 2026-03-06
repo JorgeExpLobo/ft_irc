@@ -11,6 +11,20 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+#include "cmd/PassCommand.hpp"
+#include "cmd/NickCommand.hpp"
+#include "cmd/UserCommand.hpp"
+#include "cmd/JoinCommand.hpp"
+#include "cmd/PartCommand.hpp"
+#include "cmd/PrivmsgCommand.hpp"
+#include "cmd/QuitCommand.hpp"
+#include "cmd/InviteCommand.hpp"
+#include "cmd/KickCommand.hpp"
+#include "cmd/TopicCommand.hpp"
+#include "cmd/ModeCommand.hpp"
+#include "cmd/AwayCommand.hpp"
+
 #include <cstdio>
 #include <cerrno>
 #include <csignal> // Para manejar señales
@@ -196,7 +210,7 @@ void Server::terminateClientConnection(int fd) {
 
 void Server::stopEngine() {
 	if (!_is_running && _poll_fds.empty()) // Si ya se cerró, salimos
-        return;
+		return;
 	_is_running = false;
 	std::cout << "[SHUTDOWN] Limpiando recursos y cerrando descriptores..." << std::endl;
 	for (size_t i = 0; i < _poll_fds.size(); ++i) {
@@ -207,36 +221,166 @@ void Server::stopEngine() {
 	_server_master_fd = -1; // Marcamos como cerrado, quiza no haga falta, revisar
 }
 
-// Función de limpieza
-void Server::removeClientFromAllChannels(int fd) {
-	std::cout << "[CLEANUP] Sacando FD " << fd << " de todos los canales." << std::endl;
-	
-	// Suponiendo que tengo std::vector<Channel*> _channels seria algo asi;
-	/*
-	for (size_t i = 0; i < _channels.size(); ++i) {
-		if (_channels[i]->hasClient(fd)) {
-			_channels[i]->removeClient(fd);
-			// Si el canal se queda vacío, bórralo
-			if (_channels[i]->isEmpty()) {
-				delete _channels[i];
-				_channels.erase(_channels.begin() + i);
-				i--;
-			}
+// LÓGICA PARA LOS CHANNELS Y CLIENTES
+Channel* Server::findChannel(const std::string& name)
+{
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i]->getName() == name)
+			return _channels[i];
+	}
+	return NULL;
+}
+
+Client* Server::findClient(const std::string& nickname)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin();
+         it != _clients.end(); ++it)
+    {
+        if (it->second->getNickname() == nickname)
+            return it->second;
+    }
+    return NULL;
+}
+
+Channel* Server::getChannel(const std::string& name)
+{
+    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        if ((*it)->getName() == name)
+            return *it;
+    }
+    return NULL;
+}
+
+Channel* Server::createChannel(const std::string& name, Client* creator)
+{
+    Channel* channel = new Channel(name);
+
+    _channels.push_back(channel);
+    channel->addClient(creator);
+    creator->joinChannel(channel);
+    channel->addOperator(creator);
+    std::cout << "[CHANNEL CREATED] " << name << std::endl;
+
+    return channel;
+}
+
+Channel* Server::getOrCreateChannel(const std::string& name, Client* creator)
+{
+    for (size_t i = 0; i < _channels.size(); i++)
+    {
+        if (_channels[i]->getName() == name)
+            return _channels[i];
+    }
+    return createChannel(name, creator);
+}
+
+void Server::addClientToChannel(Client* client, const std::string& channel_name)
+{
+	Channel* channel = findChannel(channel_name);
+
+	if (!channel)
+	{
+		channel = createChannel(channel_name, client);
+		return;
+	}
+
+	channel->addClient(client);
+	client->joinChannel(channel);
+
+	std::cout << "[JOIN] "
+			  << client->getNickname()
+			  << " -> "
+			  << channel_name
+			  << std::endl;
+}
+
+void Server::removeClientFromChannel(Client* client, const std::string& channel_name)
+{
+	Channel* channel = findChannel(channel_name);
+
+	if (!channel)
+		return;
+
+	channel->removeClient(client);
+	client->leaveChannel(channel);
+
+	std::cout << "[PART] "
+			  << client->getNickname()
+			  << " <- "
+			  << channel_name
+			  << std::endl;
+
+	if (channel->isEmpty())
+		removeChannel(channel_name);
+}
+
+void Server::removeChannel(const std::string& name)
+{
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i]->getName() == name)
+		{
+			delete _channels[i];
+			_channels.erase(_channels.begin() + i);
+
+			std::cout << "[CHANNEL REMOVED] " << name << std::endl;
+			return;
 		}
 	}
-	*/
 }
 
-// Para enviar mensajes a todo un canal menos al que escribe
-void Server::broadcastToChannel(std::string message, std::string channel_name, int exclude_fd) {
-	(void)message; (void)channel_name; (void)exclude_fd;
-	// Aquí busco el canal por nombre y llamarías a su propio broadcast
-	std::cout << "[BROADCAST] Enviando a " << channel_name << " excluyendo " << exclude_fd << std::endl;
+void Server::removeClientFromAllChannels(int fd)
+{
+	Client* client = _clients[fd];
+
+	std::set<Channel*> channels = client->getChannels();
+
+	for (std::set<Channel*>::iterator it = channels.begin();
+		 it != channels.end(); ++it)
+	{
+		Channel* channel = *it;
+
+		channel->removeClient(client);
+
+		if (channel->isEmpty())
+			removeChannel(channel->getName());
+	}
+
+	std::cout << "[CLEANUP] Removed client from all channels" << std::endl;
 }
 
-// Para buscar canales (para el JOIN)
-void* Server::findChannel(std::string name) {
-	(void)name;
-	// Retornará el puntero al canal o NULL
-	return NULL; 
+void Server::broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd)
+{
+	const std::set<Client*>& clients = channel->getClients();
+
+	for (std::set<Client*>::const_iterator it = clients.begin();
+		 it != clients.end(); ++it)
+	{
+		Client* client = *it;
+
+		if (client->getFd() == exclude_fd)
+			continue;
+
+		send(client->getFd(), message.c_str(), message.size(), 0);
+	}
+}
+
+void Server::sendToClient(Client* client, const std::string& message)
+{
+	std::string out = message + "\r\n";
+
+	send(client->getFd(), out.c_str(), out.size(), 0);
+}
+
+// FUNCIONES AUXILIARES PARA COMANDOS
+bool Server::nickExists(const std::string& nick) const
+{
+    for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (it->second->getNickname() == nick)
+            return true;
+    }
+    return false;
 }

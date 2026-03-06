@@ -113,7 +113,6 @@ public:
     Message &operator=(const Message &other);
     ~Message(); 
 
-    
     /*
      stringify()
      -----------
@@ -168,6 +167,13 @@ public:
        ":nick!user@host PRIVMSG #canal :hola a todos"
      */
     bool parseRequest(const std::string &str);
+
+	// Funciones auxiliares para los comandos
+	std::string getCommand() const;
+	const std::string& getArg(int i) const;
+	int getArgCount() const;
+	std::string getTrailing() const;
+	std::string toString() const;
 };
 
 #endif

@@ -46,6 +46,21 @@ SRC						:=	main.cpp \
 							Server.cpp \
 							Client.cpp \
 							Channel.cpp \
+							Message.cpp \
+							Reply.cpp \
+							CommandManager.cpp \
+							cmd/PassCommand.cpp \
+							cmd/NickCommand.cpp \
+							cmd/UserCommand.cpp \
+							cmd/JoinCommand.cpp \
+							cmd/PartCommand.cpp \
+							cmd/PrivmsgCommand.cpp \
+							cmd/QuitCommand.cpp \
+							cmd/InviteCommand.cpp \
+							cmd/KickCommand.cpp \
+							cmd/TopicCommand.cpp \
+							cmd/ModeCommand.cpp \
+							cmd/AwayCommand.cpp
 
 OBJ						:=	$(addprefix $(DIR_OBJ), $(SRC:cpp=o))
 
