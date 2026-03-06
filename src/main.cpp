@@ -6,12 +6,14 @@
 /*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 20:14:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/05 18:34:36 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/03/06 13:32:43 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include <cstdlib> // Para atoi
+#include <cerrno>
+#include <iostream>
 
 int main(int argc, char** argv) {
 	if (argc != 3) {

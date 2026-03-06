@@ -6,7 +6,7 @@
 /*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/05 20:27:44 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/03/06 17:24:49 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,16 @@
 #include <cstdio>
 #include <cerrno>
 #include <csignal> // Para manejar señales
+
+// se incluyen aqui y no en el hpp
+# include <iostream>
+# include <poll.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+# include <unistd.h>
+# include <cstring>
+# include <algorithm>
 
 // Flags globales para control de señales (Estándar en 42)
 bool g_server_shutdown = false;
@@ -240,4 +250,12 @@ void* Server::findChannel(std::string name) {
 	(void)name;
 	// Retornará el puntero al canal o NULL
 	return NULL; 
+}
+
+int	Server::getPort() const {
+	return _port;
+}
+
+std::string	Server::getPassword() const {
+	return _password;
 }

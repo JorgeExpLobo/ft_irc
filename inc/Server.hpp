@@ -6,24 +6,25 @@
 /*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 20:29:46 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/05 20:29:47 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/03/06 13:31:39 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
 # include <vector>
 # include <map>
 # include <string>
 # include <poll.h>
-# include <sys/socket.h>
-# include <netinet/in.h>
-# include <fcntl.h>
-# include <unistd.h>
-# include <cstring>
-# include <algorithm>
+// se incluyen en el cpp, aqui no son necesarios
+// # include <iostream>
+// # include <sys/socket.h>
+// # include <netinet/in.h>
+// # include <fcntl.h>
+// # include <unistd.h>
+// # include <cstring>
+// # include <algorithm>
 
 // Estructura temporal para testeo (será sustituida por class Client)
 struct Client {
@@ -68,8 +69,8 @@ public:
 	void	stopEngine(); 	// Cierre limpio
 
 	// Getters básicos (útiles para el CommandHandler si finalmente se hace)
-	int			getPort() const { return _port; }
-	std::string	getPassword() const { return _password; }
+	int			getPort() const;
+	std::string	getPassword() const;
 };
 
 // Declaración del handler de señales (va fuera de la clase)
