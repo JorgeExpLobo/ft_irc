@@ -150,38 +150,49 @@ void Server::establishNewConnection() {
 	}
 }
 
-void Server::processIncomingData(int fd) {
+void Server::processIncomingData(int fd)
+{
 	char read_buffer[512];
 	std::memset(read_buffer, 0, sizeof(read_buffer));
-	
+
 	int bytes_received = recv(fd, read_buffer, sizeof(read_buffer) - 1, 0);
 
-	if (bytes_received <= 0) {
+	if (bytes_received <= 0)
+	{
 		this->terminateClientConnection(fd);
-	} else {
-		read_buffer[bytes_received] = '\0';
-		
-		// --- GESTIÓN DE BUFFER ---
-		_clients[fd]->appendBuffer(read_buffer);
+		return;
+	}
 
+	read_buffer[bytes_received] = '\0';
 
-		// --- PROCESAR COMANDOS ---
-		std::string& current_buffer = _clients[fd]->getBuffer();
+	// Guardamos el cliente antes de procesar
+	Client* client = _clients[fd];
 
-		size_t newline_pos;
-		while ((newline_pos = current_buffer.find("\n")) != std::string::npos) {
-			std::string raw_command = current_buffer.substr(0, newline_pos);
-			
-			if (!raw_command.empty() && raw_command[raw_command.size() - 1] == '\r')
-				raw_command.erase(raw_command.size() - 1);
-			
-			// Lógica de parseo y ejecución de comandos
-			Message msg;
-			if (!msg.parseRequest(raw_command))
-				return;
-			_commandManager.execute(this, _clients[fd], msg);
-			current_buffer.erase(0, newline_pos + 1);
-		}
+	// --- GESTIÓN DE BUFFER ---
+	client->appendBuffer(read_buffer);
+
+	// --- PROCESAR COMANDOS ---
+	std::string& current_buffer = client->getBuffer();
+
+	size_t newline_pos;
+	while ((newline_pos = current_buffer.find("\n")) != std::string::npos)
+	{
+		std::string raw_command = current_buffer.substr(0, newline_pos);
+
+		if (!raw_command.empty() && raw_command[raw_command.size() - 1] == '\r')
+			raw_command.erase(raw_command.size() - 1);
+
+		Message msg;
+		if (!msg.parseRequest(raw_command))
+			return;
+
+		_commandManager.execute(this, client, msg);
+
+		// Si el cliente fue eliminado (QUIT, error, etc.), salimos
+		if (_clients.find(fd) == _clients.end())
+			return;
+
+		current_buffer.erase(0, newline_pos + 1);
 	}
 }
 
@@ -333,37 +344,46 @@ void Server::removeChannel(const std::string& name)
 
 void Server::removeClientFromAllChannels(int fd)
 {
-	Client* client = _clients[fd];
+    Client* client = _clients[fd];
 
-	std::set<Channel*> channels = client->getChannels();
+    std::set<Channel*> channels = client->getChannels();
+    std::vector<std::string> toDelete;
 
-	for (std::set<Channel*>::iterator it = channels.begin();
-		 it != channels.end(); ++it)
-	{
-		Channel* channel = *it;
+    for (std::set<Channel*>::iterator it = channels.begin();
+         it != channels.end(); ++it)
+    {
+        Channel* channel = *it;
 
-		channel->removeClient(client);
+        channel->removeClient(client);
+		client->leaveChannel(channel);
 
-		if (channel->isEmpty())
-			removeChannel(channel->getName());
-	}
+        if (channel->isEmpty())
+            toDelete.push_back(channel->getName());
+    }
 
-	std::cout << "[CLEANUP] Removed client from all channels" << std::endl;
+    for (size_t i = 0; i < toDelete.size(); i++)
+        removeChannel(toDelete[i]);
+    std::cout << "[CLEANUP] Removed client from all channels" << std::endl;
 }
 
 void Server::broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd)
 {
 	const std::set<Client*>& clients = channel->getClients();
 
+	std::string out = message + "\r\n";
+
 	for (std::set<Client*>::const_iterator it = clients.begin();
 		 it != clients.end(); ++it)
 	{
 		Client* client = *it;
 
+		if (!client)
+			continue;
+
 		if (client->getFd() == exclude_fd)
 			continue;
 
-		send(client->getFd(), message.c_str(), message.size(), 0);
+		send(client->getFd(), out.c_str(), out.size(), 0);
 	}
 }
 

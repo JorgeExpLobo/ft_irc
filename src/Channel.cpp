@@ -30,6 +30,8 @@ void Channel::setTopic(const std::string& topic)
 
 void Channel::addClient(Client* client)
 {
+	if (_clients.find(client) != _clients.end())
+        return;
 	_clients.insert(client);
 	std::cout << "[CHANNEL] "
 			  << client->getNickname()
