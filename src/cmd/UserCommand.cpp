@@ -19,6 +19,11 @@ void UserCommand::execute(Server* server, Client* client, const Message& msg)
 
     if (client->isRegistered())
     {
+		std::cout << "[REGISTER] "
+              << "nick=" << client->getNickname()
+              << " user=" << client->getUsername()
+              << " host=" << client->getHost()
+              << std::endl;
         Message welcome = Reply::welcome(
             client->getNickname(),
             client->getUsername(),

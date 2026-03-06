@@ -22,7 +22,10 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
         server->sendToClient(client, err.toString());
         return;
     }
-
+	std::string oldNick = client->getNickname();
     client->setNickname(nick);
+	std::cout << "[NICK CHANGE] "
+          << oldNick << " -> "
+          << nick << std::endl;
     client->tryRegister();
 }

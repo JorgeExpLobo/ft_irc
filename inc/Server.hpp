@@ -30,6 +30,7 @@
 
 class Server {
 private:
+	// TODO: std::string					_name;
 	int							_port;
 	std::string					_password;
 	int							_server_master_fd;

@@ -141,11 +141,6 @@ void Server::establishNewConnection() {
 		
 		Client* new_client = new Client(new_client_fd, "localhost");
 		_clients[new_client_fd] = new_client;
-		
-		// Futura implementación con clase Client +-:
-		// Client* new_client = new Client(new_client_fd);
-		// _clients_map[new_client_fd] = new_client;
-
 		std::cout << "[+] Cliente vinculado en FD: " << new_client_fd << std::endl;
 	}
 }
@@ -197,8 +192,13 @@ void Server::processIncomingData(int fd)
 }
 
 void Server::terminateClientConnection(int fd) {
-	std::cout << "[-] Desvinculando FD: " << fd << std::endl;
-	
+	Client* client = _clients[fd];
+
+	std::cout << "[DISCONNECT] "
+          << client->getNickname()
+          << " (" << client->getUsername()
+          << "@" << client->getHost() << ")"
+          << std::endl;
 	// Limpieza de canales (Llamada al metodo)
 	// Aquí va la función para sacar al cliente de todos los canales antes de borrarlo
 	this->removeClientFromAllChannels(fd);
