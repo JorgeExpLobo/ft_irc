@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 22:08:29 by pablo             #+#    #+#             */
-/*   Updated: 2026/03/08 19:44:47 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/08 22:29:53 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,9 @@
 
 #define SERVER_NAME "irc.42madrid.com"
 
-namespace Reply 
-{
 
-Message welcome(const std::string &nick, const std::string &user, const std::string &host) 
+
+Message Reply::welcome(const std::string &nick, const std::string &user, const std::string &host) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(1)
@@ -32,7 +31,7 @@ Message welcome(const std::string &nick, const std::string &user, const std::str
                     .pushSuffix("Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host);
 }
 
-Message error(const std::string &msg) 
+Message Reply::error(const std::string &msg) 
 {
     Message m;
     m.setPrefix(SERVER_NAME).setCommand("ERROR");
@@ -41,7 +40,7 @@ Message error(const std::string &msg)
     return m;
 }
 
-Message kill(const std::string &nick, const std::string &msg) 
+Message Reply::kill(const std::string &nick, const std::string &msg) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setCommand("KILL")
@@ -50,7 +49,7 @@ Message kill(const std::string &nick, const std::string &msg)
 }
 
 // hay que revisar los modos, ya que puede tener 0, 1 o mas parametros
-Message updateMode(const std::string &nick, const std::string &channel, const std::string update) 
+Message Reply::updateMode(const std::string &nick, const std::string &channel, const std::string update) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setCommand("MODE")
@@ -60,7 +59,7 @@ Message updateMode(const std::string &nick, const std::string &channel, const st
 }
 
 // Topic
-Message noTopic(const std::string &nick, const std::string &channel) 
+Message Reply::noTopic(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(331)
@@ -69,7 +68,7 @@ Message noTopic(const std::string &nick, const std::string &channel)
                     .pushSuffix("No topic is set");
 }
 
-Message topic(const std::string &nick, const std::string &channel, const std::string &topic) 
+Message Reply::topic(const std::string &nick, const std::string &channel, const std::string &topic) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(332)
@@ -79,7 +78,7 @@ Message topic(const std::string &nick, const std::string &channel, const std::st
 }
 
 // Invite
-Message inviting(const std::string &nick, const std::string &targetNick, const std::string &channel)
+Message Reply::inviting(const std::string &nick, const std::string &targetNick, const std::string &channel)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(341)
@@ -89,7 +88,7 @@ Message inviting(const std::string &nick, const std::string &targetNick, const s
 }
 
 // Away
-Message away(const std::string &nick, const std::string &awayMessage) 
+Message Reply::away(const std::string &nick, const std::string &awayMessage) 
 {
     Message msg;
     msg.setPrefix(SERVER_NAME).setReplyCode(301).pushArg(nick);
@@ -98,14 +97,14 @@ Message away(const std::string &nick, const std::string &awayMessage)
     return msg;
 }
 
-Message unaway() 
+Message Reply::unaway() 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(305)
                     .pushSuffix("You are no longer marked as being away");
 }
 
-Message nowAway() 
+Message Reply::nowAway() 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(306)
@@ -113,7 +112,7 @@ Message nowAway()
 }
 
 // Names
-Message nameReply(const std::string &nick, const Channel &chan) 
+Message Reply::nameReply(const std::string &nick, const Channel &chan) 
 {
     std::string names;
 	const std::set<Client*>& users = chan.getClients();
@@ -136,7 +135,7 @@ Message nameReply(const std::string &nick, const Channel &chan)
                     .pushSuffix(names);
 }
 
-Message endOfNames(const std::string &nick, const std::string &channel) 
+Message Reply::endOfNames(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(366)
@@ -146,7 +145,7 @@ Message endOfNames(const std::string &nick, const std::string &channel)
 }
 
 // List
-Message list(const std::string &nick, const std::string &channel, const std::string &nUsers, const std::string &topic) 
+Message Reply::list(const std::string &nick, const std::string &channel, const std::string &nUsers, const std::string &topic) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(322)
@@ -156,7 +155,7 @@ Message list(const std::string &nick, const std::string &channel, const std::str
                     .pushSuffix(topic.empty() ? "No topic set" : topic);
 }
 
-Message listEnd(const std::string &nick) 
+Message Reply::listEnd(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(323)
@@ -165,7 +164,7 @@ Message listEnd(const std::string &nick)
 }
 
 // Mode
-Message channelModeIs(const std::string &nick, const std::string &channel, const std::string &modes) 
+Message Reply::channelModeIs(const std::string &nick, const std::string &channel, const std::string &modes) 
 {
     Message m;
     m.setPrefix(SERVER_NAME).setReplyCode(324).pushArg(nick).pushArg(channel);
@@ -175,7 +174,7 @@ Message channelModeIs(const std::string &nick, const std::string &channel, const
 }
 
 // Errors
-Message errUnknownMode(const std::string &nick, const std::string &channel, const std::string &mode) 
+Message Reply::errUnknownMode(const std::string &nick, const std::string &channel, const std::string &mode) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(472)
@@ -184,7 +183,7 @@ Message errUnknownMode(const std::string &nick, const std::string &channel, cons
                     .pushSuffix("is unknown mode char to me for " + channel);
 }
 
-Message errUnknownCommand(const std::string &nick, const std::string &command)
+Message Reply::errUnknownCommand(const std::string &nick, const std::string &command)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(421)
@@ -193,7 +192,7 @@ Message errUnknownCommand(const std::string &nick, const std::string &command)
                     .pushSuffix("Unknown command");
 }
 
-Message errNoNicknameGiven(const std::string &nick) 
+Message Reply::errNoNicknameGiven(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(431)
@@ -201,7 +200,7 @@ Message errNoNicknameGiven(const std::string &nick)
                     .pushSuffix("No nickname given");
 }
 
-Message errErroneousNickname(const std::string &nick, const std::string &badnick) 
+Message Reply::errErroneousNickname(const std::string &nick, const std::string &badnick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(432)
@@ -210,7 +209,7 @@ Message errErroneousNickname(const std::string &nick, const std::string &badnick
                     .pushSuffix("Erroneous nickname");
 }
 
-Message errNicknameInUse(const std::string &nick, const std::string &badnick)
+Message Reply::errNicknameInUse(const std::string &nick, const std::string &badnick)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(433)
@@ -219,7 +218,7 @@ Message errNicknameInUse(const std::string &nick, const std::string &badnick)
                     .pushSuffix("Nickname is already in use");
 }
 
-Message errNoSuchNick(const std::string &nick, const std::string &badnick)
+Message Reply::errNoSuchNick(const std::string &nick, const std::string &badnick)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(401)
@@ -228,7 +227,7 @@ Message errNoSuchNick(const std::string &nick, const std::string &badnick)
                     .pushSuffix("No such nick/channel");
 }
 
-Message errNickCollision(const std::string &nick, const std::string &user, const std::string &host, const std::string &badnick) 
+Message Reply::errNickCollision(const std::string &nick, const std::string &user, const std::string &host, const std::string &badnick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(436)
@@ -237,7 +236,7 @@ Message errNickCollision(const std::string &nick, const std::string &user, const
                     .pushSuffix("Nickname collision KILL from " + user + "@" + host);
 }
 
-Message errUnavailResource(const std::string &nick, const std::string &target) 
+Message Reply::errUnavailResource(const std::string &nick, const std::string &target) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(437)
@@ -246,7 +245,7 @@ Message errUnavailResource(const std::string &nick, const std::string &target)
                     .pushSuffix("Nick/channel is temporarily unavailable");
 }
 
-Message errRestricted(const std::string &nick) 
+Message Reply::errRestricted(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(484)
@@ -254,7 +253,7 @@ Message errRestricted(const std::string &nick)
                     .pushSuffix("Your connection is restricted!");
 }
 
-Message errNeedMoreParams(const std::string &nick, const std::string &command)
+Message Reply::errNeedMoreParams(const std::string &nick, const std::string &command)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(461)
@@ -263,7 +262,7 @@ Message errNeedMoreParams(const std::string &nick, const std::string &command)
                     .pushSuffix("Not enough parameters");
 }
 
-Message errAlreadyRegistered(const std::string &nick)
+Message Reply::errAlreadyRegistered(const std::string &nick)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(462)
@@ -271,7 +270,7 @@ Message errAlreadyRegistered(const std::string &nick)
                     .pushSuffix("Unauthorized command (already registered)");
 }
 
-Message errNoOrigin(const std::string &nick)
+Message Reply::errNoOrigin(const std::string &nick)
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(409)
@@ -280,7 +279,7 @@ Message errNoOrigin(const std::string &nick)
 }
 
 
-Message errNoSuchChannel(const std::string &nick, const std::string &channel) 
+Message Reply::errNoSuchChannel(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(403)
@@ -289,7 +288,7 @@ Message errNoSuchChannel(const std::string &nick, const std::string &channel)
                     .pushSuffix("No such channel");
 }
 
-Message errPassWdMissMatch(const std::string &nick) 
+Message Reply::errPassWdMissMatch(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(464)
@@ -297,7 +296,7 @@ Message errPassWdMissMatch(const std::string &nick)
                     .pushSuffix("Password incorrect");
 }
 
-Message errInviteOnlyChan(const std::string &nick, const std::string &channel) 
+Message Reply::errInviteOnlyChan(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(473)
@@ -306,7 +305,7 @@ Message errInviteOnlyChan(const std::string &nick, const std::string &channel)
                     .pushSuffix("Cannot join channel (+i)");
 }
 
-Message errBadChannelKey(const std::string &nick,  const std::string &channel) 
+Message Reply::errBadChannelKey(const std::string &nick,  const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(475)
@@ -318,7 +317,7 @@ Message errBadChannelKey(const std::string &nick,  const std::string &channel)
 
 
 
-Message errChannelIsFull(const std::string &nick, const std::string &channel) 
+Message Reply::errChannelIsFull(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(471)
@@ -327,7 +326,7 @@ Message errChannelIsFull(const std::string &nick, const std::string &channel)
                     .pushSuffix("Cannot join channel (+l)");
 }
 
-Message errNotOnChannel(const std::string &nick, const std::string &channel) 
+Message Reply::errNotOnChannel(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(442)
@@ -336,7 +335,7 @@ Message errNotOnChannel(const std::string &nick, const std::string &channel)
                     .pushSuffix("You're not on that channel");
 }
 
-Message errNoRecipient(const std::string &nick, const std::string &command) 
+Message Reply::errNoRecipient(const std::string &nick, const std::string &command) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(411)
@@ -344,7 +343,7 @@ Message errNoRecipient(const std::string &nick, const std::string &command)
                     .pushSuffix("No recipient given (" + command + ")");
 }
 
-Message errNoTextToSend(const std::string &nick) 
+Message Reply::errNoTextToSend(const std::string &nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(412)
@@ -352,7 +351,7 @@ Message errNoTextToSend(const std::string &nick)
                     .pushSuffix("No text to send");
 }
 
-Message errCannotSendToChan(const std::string &nick, const std::string &channel) 
+Message Reply::errCannotSendToChan(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(404)
@@ -361,7 +360,7 @@ Message errCannotSendToChan(const std::string &nick, const std::string &channel)
                     .pushSuffix("Cannot send to channel");
 }
 
-Message errChanOpIsNeeded(const std::string &nick, const std::string &channel) 
+Message Reply::errChanOpIsNeeded(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(482)
@@ -370,7 +369,7 @@ Message errChanOpIsNeeded(const std::string &nick, const std::string &channel)
                     .pushSuffix("You're not a channel operator");
 }
 
-Message errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick) 
+Message Reply::errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(441)
@@ -380,7 +379,7 @@ Message errUserNotInChannel(const std::string &nick, const std::string &channel,
                     .pushSuffix("They aren't on that channel");
 }
 
-Message errKeyset(const std::string &nick, const std::string &channel) 
+Message Reply::errKeyset(const std::string &nick, const std::string &channel) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(467)
@@ -389,7 +388,6 @@ Message errKeyset(const std::string &nick, const std::string &channel)
                     .pushSuffix("Channel key already set");
 }
 
-}
 
 Message Reply::pong(const std::string &serverName, const std::string &token)
 {
