@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 22:08:29 by pablo             #+#    #+#             */
-/*   Updated: 2026/03/05 22:20:25 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/08 19:44:47 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,4 +389,14 @@ Message errKeyset(const std::string &nick, const std::string &channel)
                     .pushSuffix("Channel key already set");
 }
 
+}
+
+Message Reply::pong(const std::string &serverName, const std::string &token)
+{
+    Message msg;
+    msg.setPrefix(SERVER_NAME)
+       .setCommand("PONG")
+       .pushArg(serverName)
+       .pushSuffix(token);
+    return msg;
 }

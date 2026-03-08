@@ -77,6 +77,7 @@ namespace Reply
     Message errChanOpIsNeeded(const std::string &nick, const std::string &channel);
     Message errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick);
     Message errKeyset(const std::string &nick, const std::string &channel);
+    Message pong(const std::string &serverName, const std::string &token);
 
 }
 

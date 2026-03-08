@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+         #
+#    By: pablo <pablo@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/24 19:48:59 by jdiaz-he          #+#    #+#              #
-#    Updated: 2026/02/17 19:20:02 by jdiaz-he         ###   ########.fr        #
+#    Updated: 2026/03/08 16:08:14 by pablo            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,7 +60,8 @@ SRC						:=	main.cpp \
 							cmd/KickCommand.cpp \
 							cmd/TopicCommand.cpp \
 							cmd/ModeCommand.cpp \
-							cmd/AwayCommand.cpp
+							cmd/AwayCommand.cpp \
+							cmd/PingCommand.cpp
 
 OBJ						:=	$(addprefix $(DIR_OBJ), $(SRC:cpp=o))
 

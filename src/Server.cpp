@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/05 20:27:44 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/03/08 16:19:57 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "cmd/TopicCommand.hpp"
 #include "cmd/ModeCommand.hpp"
 #include "cmd/AwayCommand.hpp"
+#include "cmd/PingCommand.hpp"
 
 #include <cstdio>
 #include <cerrno>
@@ -92,6 +93,8 @@ void Server::init() {
 	_commandManager.registerCommand("TOPIC", new TopicCommand());
 	_commandManager.registerCommand("MODE", new ModeCommand());
 	_commandManager.registerCommand("AWAY", new AwayCommand());
+	_commandManager.registerCommand("PING", new PingCommand());
+	
 	std::cout << "--- Servidor IRC 'The Engine' iniciado ---" << std::endl;
 	std::cout << "Puerto: " << _port << " | Password: " << _password << std::endl;
 }
