@@ -64,6 +64,7 @@ public:
 	// Getters básicos (útiles para el CommandHandler si finalmente se hace)
 	int			getPort() const { return _port; }
 	std::string	getPassword() const { return _password; }
+	const std::map<int, Client*>& getClients() const { return _clients; }
 
 	// CHANNEL MANAGEMENT
 

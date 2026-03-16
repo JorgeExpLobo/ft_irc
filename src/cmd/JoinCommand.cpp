@@ -17,24 +17,23 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
 
     std::string channelName = msg.getArg(0);
 
-	Channel* chan = server->getOrCreateChannel(channelName, client);
+    Channel* chan = server->getOrCreateChannel(channelName, client);
 
-	chan->addClient(client);
-	client->joinChannel(chan);
-
-	if (chan->getClientCount() == 1)
-		chan->addOperator(client);
+    chan->addClient(client);
+    client->joinChannel(chan);
 
     if (chan->getClientCount() == 1)
         chan->addOperator(client);
 
-		server->broadcastToChannel(
-		chan,
-		":" + client->getPrefix() + " JOIN " + channelName, client->getFd()
-	);
+    std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName;
+    server->sendToClient(client, joinMsg);
 
-	server->sendToClient(client,
-		Reply::nameReply(client->getNickname(), *chan).toString());
-	server->sendToClient(client,
-		Reply::endOfNames(client->getNickname(), channelName).toString());
+    server->broadcastToChannel(chan, joinMsg, client->getFd());
+
+
+    server->sendToClient(client,
+        Reply::nameReply(client->getNickname(), *chan).toString());
+
+    server->sendToClient(client,
+        Reply::endOfNames(client->getNickname(), channelName).toString());
 }
