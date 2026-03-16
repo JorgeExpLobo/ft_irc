@@ -10,8 +10,8 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
 {
     if (msg.getArgCount() == 0)
     {
-        Message err = Reply::errNeedMoreParams(client->getNickname(), "JOIN");
-        server->sendToClient(client, err.toString());
+        server->sendToClient(client, 
+            Reply::errNeedMoreParams(client->getNickname(), "JOIN").stringify() + "\r\n");
         return;
     }
 
@@ -25,15 +25,19 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
     if (chan->getClientCount() == 1)
         chan->addOperator(client);
 
-    std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName;
-    server->sendToClient(client, joinMsg);
+    Message joinNotify;
+    joinNotify.setPrefix(client->getPrefix())
+              .setCommand("JOIN")
+              .pushSuffix(channelName);
 
-    server->broadcastToChannel(chan, joinMsg, client->getFd());
+    std::string rawJoin = joinNotify.stringify() + "\r\n";
 
+    server->sendToClient(client, rawJoin);
+    server->broadcastToChannel(chan, rawJoin, client->getFd());
 
-    server->sendToClient(client,
-        Reply::nameReply(client->getNickname(), *chan).toString());
+    server->sendToClient(client, 
+        Reply::nameReply(client->getNickname(), *chan).stringify() + "\r\n");
 
-    server->sendToClient(client,
-        Reply::endOfNames(client->getNickname(), channelName).toString());
+    server->sendToClient(client, 
+        Reply::endOfNames(client->getNickname(), channelName).stringify() + "\r\n");
 }

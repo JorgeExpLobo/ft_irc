@@ -9,29 +9,44 @@ TopicCommand::~TopicCommand() {}
 
 void TopicCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.getArgCount() == 0)
+    if (msg.getArgCount() < 1) 
+    {
+        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "TOPIC").stringify() + "\r\n");
         return;
+    }
 
     std::string channelName = msg.getArg(0);
     Channel* chan = server->findChannel(channelName);
 
-    if (!chan)
-        return;
-
-   
-    if (msg.suffix().empty())
+    if (!chan) 
     {
-        server->sendToClient(client,
-            Reply::topic(client->getNickname(), channelName, chan->getTopic()).toString());
+        server->sendToClient(client, Reply::errNoSuchChannel(client->getNickname(), channelName).stringify() + "\r\n");
+        return;
+    }
 
-        // Enviar también el WHO/TIME (333)
-        std::stringstream ss;
-        ss << chan->getTopicSetter() << " " << chan->getTopicTime();
+    if (!msg.hasSuffix())
+    {
+        if (chan->getTopic().empty()) 
+        {
+            server->sendToClient(client, Reply::noTopic(client->getNickname(), channelName).stringify() + "\r\n");
+        } 
+        else 
+        {
+            server->sendToClient(client, Reply::topic(client->getNickname(), channelName, chan->getTopic()).stringify() + "\r\n");
+            
+            Message whoTime;
+            std::stringstream ss;
+            ss << chan->getTopicTime();
+            whoTime.setPrefix(SERVER_NAME).setReplyCode(333)
+                   .pushArg(client->getNickname()).pushArg(channelName)
+                   .pushArg(chan->getTopicSetter()).pushArg(ss.str());
+            server->sendToClient(client, whoTime.stringify() + "\r\n");
+        }
+        return;
+    }
 
-        server->sendToClient(client,
-            std::string(":") + SERVER_NAME + " 333 " + client->getNickname() +
-            " " + channelName + " " + ss.str());
-
+    if (/*chan->isTopicRestricted() && */ !chan->isOperator(client)) {
+        server->sendToClient(client, Reply::errChanOpIsNeeded(client->getNickname(), channelName).stringify() + "\r\n");
         return;
     }
 
@@ -39,25 +54,29 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
     chan->setTopic(newTopic);
     chan->setTopicSetter(client->getNickname());
     chan->setTopicTime(time(NULL));
+    
+    Message topicNotify;
+    topicNotify.setPrefix(client->getPrefix())
+               .setCommand("TOPIC")
+               .pushArg(channelName)
+               .pushSuffix(newTopic);
 
-   
-    std::string topicMsg =
-        ":" + client->getPrefix() + " TOPIC " + channelName + " :" + newTopic;
-    server->sendToClient(client, topicMsg);
+    std::string rawNotify = topicNotify.stringify() + "\r\n";
+    server->sendToClient(client, rawNotify);
+    server->broadcastToChannel(chan, rawNotify, client->getFd());
 
- 
-    server->broadcastToChannel(chan, topicMsg, client->getFd());
+    server->sendToClient(client, Reply::topic(client->getNickname(), channelName, newTopic).stringify() + "\r\n");
 
-    // Envia RPL_TOPIC (332)
-    server->sendToClient(client,
-        std::string(":") + SERVER_NAME + " 332 " + client->getNickname() +
-        " " + channelName + " :" + newTopic);
-
-    // Envia RPL_TOPICWHOTIME (333)
+    Message whoTime;
     std::stringstream ss;
-    ss << client->getNickname() << " " << chan->getTopicTime();
+    ss << chan->getTopicTime();
 
-    server->sendToClient(client,
-        std::string(":") + SERVER_NAME + " 333 " + client->getNickname() +
-        " " + channelName + " " + ss.str());
+    whoTime.setPrefix(SERVER_NAME)
+           .setReplyCode(333)
+           .pushArg(client->getNickname())
+           .pushArg(channelName)
+           .pushArg(client->getNickname()) 
+           .pushArg(ss.str());  
+
+    server->sendToClient(client, whoTime.stringify() + "\r\n");
 }

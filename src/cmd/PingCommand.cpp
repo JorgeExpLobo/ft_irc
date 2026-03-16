@@ -7,15 +7,20 @@ PingCommand::~PingCommand() {}
 
 void PingCommand::execute(Server* server, Client* client, const Message& msg)
 {
+    
     if (msg.argsCount() == 0 && !msg.hasSuffix())
-        return; // ERR_NEEDMOREPARAMS opcional
+    {
+        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "PING").stringify() + "\r\n");
+        return;
+    }
 
-    // El token viene en el primer argumento o en el sufijo
     std::string token = msg.hasSuffix() ? msg.suffix() : msg.arg(0);
 
-    // Formato IRC correcto:
-    // :server.name PONG clientNick :token
-    std::string reply = std::string(":") + SERVER_NAME + " PONG " + client->getNickname() + " :" + token;
+    Message pong;
+    pong.setPrefix(SERVER_NAME)   
+        .setCommand("PONG") 
+        .pushArg(SERVER_NAME)
+        .pushSuffix(token);
 
-    server->sendToClient(client, reply);
+    server->sendToClient(client, pong.stringify() + "\r\n");
 }

@@ -10,7 +10,7 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
     if (msg.getArgCount() == 0)
     {
         Message err = Reply::errNoNicknameGiven(client->getNickname());
-        server->sendToClient(client, err.toString());
+        server->sendToClient(client, err.stringify() + "\r\n");
         return;
     }
 
@@ -19,7 +19,7 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
     if (server->nickExists(nick))
     {
         Message err = Reply::errNicknameInUse(client->getNickname(), nick);
-        server->sendToClient(client, err.toString());
+        server->sendToClient(client, err.stringify() + "\r\n");
         return;
     }
 
@@ -29,21 +29,22 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
 
     std::cout << "[NICK CHANGE] " << oldNick << " -> " << nick << std::endl;
 
-    // Construimos el mensaje IRC correcto
-    //    :oldNick!user@host NICK :newNick
-    std::string prefix = ":" + oldNick + "!" + client->getUsername() + "@" + client->getHost();
-    std::string nickMsg = prefix + " NICK :" + nick;
+    Message nickUpdate;
+    nickUpdate.setPrefix(oldNick + "!" + client->getUsername() + "@" + client->getHost())
+              .setCommand("NICK")
+              .pushSuffix(nick);
 
-    server->sendToClient(client, nickMsg);
+    std::string finalMsg = nickUpdate.stringify() + "\r\n";
+
+    server->sendToClient(client, finalMsg);
 
     const std::map<int, Client*>& clients = server->getClients();
     for (std::map<int, Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)
     {
         Client* other = it->second;
         if (other != client)
-            server->sendToClient(other, nickMsg);
+            server->sendToClient(other, finalMsg);
     }
 
-    
     client->tryRegister();
 }
