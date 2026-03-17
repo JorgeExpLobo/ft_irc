@@ -42,9 +42,33 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
               .pushArg(channelName);
 
     std::string rawJoin = joinNotify.stringify();
-
     server->sendToClient(client, rawJoin);
     server->broadcastToChannel(chan, rawJoin, client->getFd());
+
+if (chan->getTopic().empty()) 
+    {
+        server->sendToClient(client, 
+            Reply::noTopic(client->getNickname(), channelName).stringify());
+    } 
+    else 
+    {
+
+        server->sendToClient(client, 
+            Reply::topic(client->getNickname(), channelName, chan->getTopic()).stringify());
+
+        // RPL_TOPICWHOTIME (333)
+        Message whoTime;
+        std::stringstream ss;
+        ss << chan->getTopicTime();
+        whoTime.setPrefix(SERVER_NAME)
+               .setReplyCode(333)
+               .pushArg(client->getNickname())
+               .pushArg(channelName)
+               .pushArg(chan->getTopicSetter())
+               .pushArg(ss.str());
+        
+        server->sendToClient(client, whoTime.stringify());
+    }
 
     server->sendToClient(client, 
         Reply::nameReply(client->getNickname(), *chan).stringify());

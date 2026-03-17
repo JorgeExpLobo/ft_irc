@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/08 16:19:57 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/17 23:48:18 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,8 @@ void Server::processIncomingData(int fd)
 	}
 }
 
-void Server::terminateClientConnection(int fd) {
+void Server::terminateClientConnection(int fd) 
+{
 	Client* client = _clients[fd];
 
 	std::cout << "[DISCONNECT] "
@@ -206,6 +207,14 @@ void Server::terminateClientConnection(int fd) {
 	// Aquí va la función para sacar al cliente de todos los canales antes de borrarlo
 	this->removeClientFromAllChannels(fd);
 
+	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
+	{
+		if (it->fd == fd) {
+			_poll_fds.erase(it);
+			break;
+		}
+	}
+
 	// Cerrar socket
 	close(fd);
 	
@@ -213,13 +222,7 @@ void Server::terminateClientConnection(int fd) {
 	delete _clients[fd];
 	_clients.erase(fd);
 
-	// Eliminar del vector de poll para que el loop no lo procese más
-	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
-		if (it->fd == fd) {
-			_poll_fds.erase(it);
-			break;
-		}
-	}
+	
 }
 
 void Server::stopEngine() {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ACommand.hpp"
+#include <sstream>
 
 class JoinCommand : public ACommand
 {
