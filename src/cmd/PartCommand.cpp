@@ -17,13 +17,29 @@ void PartCommand::execute(Server* server, Client* client, const Message& msg)
     if (!chan)
     {
         server->sendToClient(client,
-            Reply::errNoSuchChannel(client->getNickname(), channelName).toString());
+            Reply::errNoSuchChannel(client->getNickname(), channelName).stringify());
         return;
     }
+
+
+    Message partMsg;
+    partMsg.setPrefix(client->getPrefix());
+    partMsg.setCommand("PART");
+    partMsg.pushArg(channelName);
+
+    if (msg.getArgCount() > 1)
+    {
+        std::string reason = msg.suffix();
+        partMsg.pushSuffix(reason);
+    }
+
+    std::string raw = partMsg.stringify();
+
+    server->broadcastToChannel(chan, raw, -1);
 
     chan->removeClient(client);
     client->leaveChannel(chan);
 
-    server->broadcastToChannel(chan,
-        ":" + client->getPrefix() + " PART " + channelName, client->getFd());
+    // si es el ultimmo del canal deberiamos borrar el canal 
+    
 }

@@ -271,10 +271,12 @@ Channel* Server::createChannel(const std::string& name, Client* creator)
 {
     Channel* channel = new Channel(name);
 
+	(void)creator; // evita el warning
+
     _channels.push_back(channel);
-    channel->addClient(creator);
-    creator->joinChannel(channel);
-    channel->addOperator(creator);
+    //channel->addClient(creator);
+    //creator->joinChannel(channel);
+    //channel->addOperator(creator);
     std::cout << "[CHANNEL CREATED] " << name << std::endl;
 
     return channel;
@@ -375,6 +377,10 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 
 	std::string out = message + "\r\n";
 
+	//std::cout << "[BROADCAST] Channel: " << channel->getName()
+	//          << " Message: " << message << std::endl;
+
+
 	for (std::set<Client*>::const_iterator it = clients.begin();
 		 it != clients.end(); ++it)
 	{
@@ -386,6 +392,11 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 		if (client->getFd() == exclude_fd)
 			continue;
 
+	//	std::cout << "  -> sending to " 
+	//	          << client->getNickname()
+	//	          << " (fd=" << client->getFd() << ")"
+	//	          << std::endl;
+
 		send(client->getFd(), out.c_str(), out.size(), 0);
 	}
 }
@@ -393,6 +404,9 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 void Server::sendToClient(Client* client, const std::string& message)
 {
 	std::string out = message + "\r\n";
+
+	//para debug, quitar cuando funcione todo
+	std::cout << "SEND -> " << out << std::endl;
 
 	send(client->getFd(), out.c_str(), out.size(), 0);
 }

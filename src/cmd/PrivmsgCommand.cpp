@@ -7,7 +7,7 @@ PrivmsgCommand::~PrivmsgCommand() {}
 
 void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.getArgCount() < 2)
+   if (msg.getArgCount() < 2)
     {
         server->sendToClient(client,
             Reply::errNoTextToSend(client->getNickname()).toString());
@@ -16,6 +16,14 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
     std::string target = msg.getArg(0);
     std::string text = msg.suffix();
+
+    Message out;
+    out.setPrefix(client->getPrefix());
+    out.setCommand("PRIVMSG");
+    out.pushArg(target);
+    out.pushSuffix(text); 
+
+    std::string raw = out.stringify();
 
     if (target[0] == '#')
     {
@@ -28,8 +36,7 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
             return;
         }
 
-        server->broadcastToChannel(chan,
-            ":" + client->getPrefix() + " PRIVMSG " + target + " :" + text, client->getFd());
+        server->broadcastToChannel(chan, raw, client->getFd());
     }
     else
     {
@@ -42,7 +49,6 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
             return;
         }
 
-        server->sendToClient(dest,
-            ":" + client->getPrefix() + " PRIVMSG " + target + " :" + text);
+        server->sendToClient(dest, raw);
     }
 }

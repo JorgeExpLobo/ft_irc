@@ -10,7 +10,7 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
     if (msg.getArgCount() == 0)
     {
         Message err = Reply::errNoNicknameGiven(client->getNickname());
-        server->sendToClient(client, err.stringify() + "\r\n");
+        server->sendToClient(client, err.stringify());
         return;
     }
 
@@ -19,7 +19,7 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
     if (server->nickExists(nick))
     {
         Message err = Reply::errNicknameInUse(client->getNickname(), nick);
-        server->sendToClient(client, err.stringify() + "\r\n");
+        server->sendToClient(client, err.stringify());
         return;
     }
 
@@ -34,7 +34,7 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
               .setCommand("NICK")
               .pushSuffix(nick);
 
-    std::string finalMsg = nickUpdate.stringify() + "\r\n";
+    std::string finalMsg = nickUpdate.stringify();
 
     server->sendToClient(client, finalMsg);
 

@@ -144,8 +144,6 @@ public:
 
     /*
      Getters
-     -------
-     Se usan para leer los datos del mensaje parseado.
      */
 
     const std::string   &prefix () const;

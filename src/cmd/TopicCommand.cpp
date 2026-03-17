@@ -11,7 +11,7 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
 {
     if (msg.getArgCount() < 1) 
     {
-        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "TOPIC").stringify() + "\r\n");
+        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "TOPIC").stringify());
         return;
     }
 
@@ -20,7 +20,7 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
 
     if (!chan) 
     {
-        server->sendToClient(client, Reply::errNoSuchChannel(client->getNickname(), channelName).stringify() + "\r\n");
+        server->sendToClient(client, Reply::errNoSuchChannel(client->getNickname(), channelName).stringify());
         return;
     }
 
@@ -28,11 +28,11 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
     {
         if (chan->getTopic().empty()) 
         {
-            server->sendToClient(client, Reply::noTopic(client->getNickname(), channelName).stringify() + "\r\n");
+            server->sendToClient(client, Reply::noTopic(client->getNickname(), channelName).stringify());
         } 
         else 
         {
-            server->sendToClient(client, Reply::topic(client->getNickname(), channelName, chan->getTopic()).stringify() + "\r\n");
+            server->sendToClient(client, Reply::topic(client->getNickname(), channelName, chan->getTopic()).stringify());
             
             Message whoTime;
             std::stringstream ss;
@@ -40,13 +40,13 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
             whoTime.setPrefix(SERVER_NAME).setReplyCode(333)
                    .pushArg(client->getNickname()).pushArg(channelName)
                    .pushArg(chan->getTopicSetter()).pushArg(ss.str());
-            server->sendToClient(client, whoTime.stringify() + "\r\n");
+            server->sendToClient(client, whoTime.stringify());
         }
         return;
     }
 
     if (/*chan->isTopicRestricted() && */ !chan->isOperator(client)) {
-        server->sendToClient(client, Reply::errChanOpIsNeeded(client->getNickname(), channelName).stringify() + "\r\n");
+        server->sendToClient(client, Reply::errChanOpIsNeeded(client->getNickname(), channelName).stringify());
         return;
     }
 
@@ -61,11 +61,11 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
                .pushArg(channelName)
                .pushSuffix(newTopic);
 
-    std::string rawNotify = topicNotify.stringify() + "\r\n";
+    std::string rawNotify = topicNotify.stringify();
     server->sendToClient(client, rawNotify);
     server->broadcastToChannel(chan, rawNotify, client->getFd());
 
-    server->sendToClient(client, Reply::topic(client->getNickname(), channelName, newTopic).stringify() + "\r\n");
+    server->sendToClient(client, Reply::topic(client->getNickname(), channelName, newTopic).stringify());
 
     Message whoTime;
     std::stringstream ss;
@@ -78,5 +78,5 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
            .pushArg(client->getNickname()) 
            .pushArg(ss.str());  
 
-    server->sendToClient(client, whoTime.stringify() + "\r\n");
+    server->sendToClient(client, whoTime.stringify());
 }

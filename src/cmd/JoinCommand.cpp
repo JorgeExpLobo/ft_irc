@@ -11,13 +11,24 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
     if (msg.getArgCount() == 0)
     {
         server->sendToClient(client, 
-            Reply::errNeedMoreParams(client->getNickname(), "JOIN").stringify() + "\r\n");
+            Reply::errNeedMoreParams(client->getNickname(), "JOIN").stringify());
         return;
     }
 
     std::string channelName = msg.getArg(0);
 
+     if (channelName.empty() || channelName[0] != '#')
+    {
+        server->sendToClient(client,
+            Reply::errNoSuchChannel(client->getNickname(), channelName).stringify());
+        return;
+    }
+
+
     Channel* chan = server->getOrCreateChannel(channelName, client);
+    
+    if (chan->hasClient(client))
+        return;
 
     chan->addClient(client);
     client->joinChannel(chan);
@@ -28,16 +39,16 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
     Message joinNotify;
     joinNotify.setPrefix(client->getPrefix())
               .setCommand("JOIN")
-              .pushSuffix(channelName);
+              .pushArg(channelName);
 
-    std::string rawJoin = joinNotify.stringify() + "\r\n";
+    std::string rawJoin = joinNotify.stringify();
 
     server->sendToClient(client, rawJoin);
     server->broadcastToChannel(chan, rawJoin, client->getFd());
 
     server->sendToClient(client, 
-        Reply::nameReply(client->getNickname(), *chan).stringify() + "\r\n");
+        Reply::nameReply(client->getNickname(), *chan).stringify());
 
     server->sendToClient(client, 
-        Reply::endOfNames(client->getNickname(), channelName).stringify() + "\r\n");
+        Reply::endOfNames(client->getNickname(), channelName).stringify());
 }

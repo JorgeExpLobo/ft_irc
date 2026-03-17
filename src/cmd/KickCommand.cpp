@@ -19,6 +19,12 @@ void KickCommand::execute(Server* server, Client* client, const Message& msg)
     if (!chan || !target)
         return;
 
+    // Debug: punteros y tamaños antes
+    std::cout << "[DEBUG] KICK from " << client->getNickname()
+              << " -> " << target->getNickname() << " in channel " << channelName << "\n";
+    std::cout << "[DEBUG] channel clients before: " << chan->getClients().size() << "\n";
+    std::cout << "[DEBUG] target channels before: " << target->getChannels().size() << "\n";
+
     if (!chan->isOperator(client))
     {
         server->sendToClient(client,
@@ -28,6 +34,10 @@ void KickCommand::execute(Server* server, Client* client, const Message& msg)
 
     chan->removeClient(target);
     target->leaveChannel(chan);
+
+    // Debug: tamaños después
+    std::cout << "[DEBUG] channel clients after: " << chan->getClients().size() << "\n";
+    std::cout << "[DEBUG] target channels after: " << target->getChannels().size() << "\n";
 
     server->broadcastToChannel(chan,
         ":" + client->getPrefix() + " KICK " + channelName + " " + nick, client->getFd());

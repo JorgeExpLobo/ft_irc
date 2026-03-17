@@ -10,7 +10,7 @@ void PingCommand::execute(Server* server, Client* client, const Message& msg)
     
     if (msg.argsCount() == 0 && !msg.hasSuffix())
     {
-        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "PING").stringify() + "\r\n");
+        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "PING").stringify());
         return;
     }
 
@@ -22,5 +22,5 @@ void PingCommand::execute(Server* server, Client* client, const Message& msg)
         .pushArg(SERVER_NAME)
         .pushSuffix(token);
 
-    server->sendToClient(client, pong.stringify() + "\r\n");
+    server->sendToClient(client, pong.stringify());
 }
