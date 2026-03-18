@@ -86,22 +86,15 @@ void Client::tryRegister(Server* server)
     {
         _registered = true; 
 
-        std::cout << "[REGISTER] "
-                  << "nick=" << _nickname
-                  << " user=" << _username
-                  << " host=" << _host
-                  << std::endl;
-
-        // Enviar mensaje de bienvenida
         Message welcome = Reply::welcome(_nickname, _username, _host);
 
         server->sendToClient(this, welcome.stringify());
     }
     else if (!_has_pass)
     {
-        // Opcional: si intenta registrarse sin pass correcto, mandar warning
+
         std::cout << "[WARN] Cliente " << _nickname
-                  << " intentó registrarse sin password correcta." << std::endl;
+                  << " password incorrecto" << std::endl;
     }
 }
 

@@ -3,19 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 20:29:46 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/05 20:29:47 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/03/18 17:08:14 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "Client.hpp"
-# include "Channel.hpp"
-# include "CommandManager.hpp"
 # include <iostream>
 # include <vector>
 # include <map>
@@ -27,8 +24,13 @@
 # include <unistd.h>
 # include <cstring>
 # include <algorithm>
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "CommandManager.hpp"
 
-class Server {
+
+class Server 
+{
 private:
 	// TODO: std::string					_name;
 	int							_port;

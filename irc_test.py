@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+# valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./ircserv 6667 123
 import socket
 import threading
 import time

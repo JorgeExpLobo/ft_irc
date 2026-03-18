@@ -2,10 +2,10 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include "../inc/Server.hpp"
 
 // Avoid forward declaration
 class Channel;
+class Server;
 
 class Client
 {

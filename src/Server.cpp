@@ -6,25 +6,25 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/17 23:48:18 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/18 17:04:52 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
-
-#include "cmd/PassCommand.hpp"
-#include "cmd/NickCommand.hpp"
-#include "cmd/UserCommand.hpp"
-#include "cmd/JoinCommand.hpp"
-#include "cmd/PartCommand.hpp"
-#include "cmd/PrivmsgCommand.hpp"
-#include "cmd/QuitCommand.hpp"
-#include "cmd/InviteCommand.hpp"
-#include "cmd/KickCommand.hpp"
-#include "cmd/TopicCommand.hpp"
-#include "cmd/ModeCommand.hpp"
-#include "cmd/AwayCommand.hpp"
-#include "cmd/PingCommand.hpp"
+#include "../inc/Server.hpp"
+#include "../inc/CommandManager.hpp"
+#include "../inc/cmd/PassCommand.hpp"
+#include "../inc/cmd/NickCommand.hpp"
+#include "../inc/cmd/UserCommand.hpp"
+#include "../inc/cmd/JoinCommand.hpp"
+#include "../inc/cmd/PartCommand.hpp"
+#include "../inc/cmd/PrivmsgCommand.hpp"
+#include "../inc/cmd/QuitCommand.hpp"
+#include "../inc/cmd/InviteCommand.hpp"
+#include "../inc/cmd/KickCommand.hpp"
+#include "../inc/cmd/TopicCommand.hpp"
+#include "../inc/cmd/ModeCommand.hpp"
+#include "../inc/cmd/AwayCommand.hpp"
+#include "../inc/cmd/PingCommand.hpp"
 
 #include <cstdio>
 #include <cerrno>
@@ -45,6 +45,7 @@ Server::Server(int port, std::string password)
 
 Server::~Server() 
 {
+	
 	this->stopEngine();
 }
 
