@@ -4,89 +4,106 @@
 import socket
 import threading
 import time
+import sys
+
 
 HOST = '127.0.0.1'
 PORT = 6667
+PASS = "123" 
 
-NUM_CLIENTS = 5
-CHANNELS = ["#test1", "#test2"]
+def log(msg, nick="SYSTEM"):
+    print(f"[{nick}] {msg}")
 
-# -------------------------
-# Funciones base
-# -------------------------
-def connect_client(nick, user):
+# 
+# TEST 1:  (Comandos Parciales)
+
+def test_partial_commands():
+    log("Iniciando prueba de comandos fragmentados...", "PARTIAL")
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall(f"NICK {nick}\r\n".encode())
-    s.sendall(f"USER {user} 0 * :{user}\r\n".encode())
-    return s
-
-def join_channel(sock, channel):
-    sock.sendall(f"JOIN {channel}\r\n".encode())
-
-def send_message(sock, target, text):
-    sock.sendall(f"PRIVMSG {target} :{text}\r\n".encode())
-
-def part_channel(sock, channel):
-    sock.sendall(f"PART {channel}\r\n".encode())
-
-def quit_client(sock, reason="bye"):
-    sock.sendall(f"QUIT :{reason}\r\n".encode())
-    sock.close()
-
-def read_response(sock, timeout=0.1):
-    """Opcional: leer mensajes del servidor para debug"""
-    sock.settimeout(timeout)
+    
+    # Enviamos el PASS letra a letra con pausas
+    for char in f"PASS {PASS}\r":
+        s.send(char.encode())
+        time.sleep(0.01)
+    s.send("\n".encode())
+    
+    # NICK enviado en dos trozos sin saltos de línea intermedios
+    s.send("NICK fragmen".encode())
+    time.sleep(0.5)
+    s.send("tado\r\n".encode())
+    
+    s.send("USER f 0 * :f\r\n".encode())
+    time.sleep(0.5)
+    
+    # Si el server no tiene buffer por cliente, esto fallará
+    s.settimeout(1)
     try:
-        while True:
-            data = sock.recv(4096)
-            if not data:
-                break
-            print(data.decode(), end="")
-    except:
-        pass
+        resp = s.recv(1024).decode()
+        if "001" in resp: log("Login exitoso con comandos fragmentados.", "OK")
+    except: log("Error: El servidor no procesó el comando fragmentado.", "FAIL")
+    s.close()
 
-# -------------------------
-# Hilo cliente
-# -------------------------
+# TEST 2: Desconexión Abrupta (No QUIT)
+
+def test_abrupt_exit(n):
+    nick = f"ghost_{n}"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST, PORT))
+        s.send(f"PASS {PASS}\r\nNICK {nick}\r\nUSER {nick} 0 * :{nick}\r\n".encode())
+        time.sleep(0.2)
+        # Cerramos el socket de golpe sin mandar QUIT. 
+        # El servidor DEBE detectar esto en el poll() y limpiar.
+        s.close() 
+        log(f"Cliente {nick} desconectado abruptamente.", "ABRUPT")
+    except Exception as e:
+        log(f"Error en abrupt_exit: {e}", "FAIL")
+
+
+# TEST 3: (Concurrencia)
+
 def client_thread(n):
     nick = f"user{n}"
-    user = f"user{n}"
-    s = connect_client(nick, user)
-    time.sleep(0.1)  # esperar registro
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST, PORT))
+        s.sendall(f"PASS {PASS}\r\nNICK {nick}\r\nUSER {nick} 0 * :{nick}\r\n".encode())
+        time.sleep(0.1)
 
-    # Unirse a todos los canales
-    for ch in CHANNELS:
-        join_channel(s, ch)
-        time.sleep(0.05)
-
-    # Enviar 3 mensajes por canal
-    for ch in CHANNELS:
-        for i in range(3):
-            send_message(s, ch, f"Mensaje {i} desde {nick}")
+        s.sendall(f"JOIN #test\r\n".encode())
+        for i in range(2):
+            s.sendall(f"PRIVMSG #test :Mensaje {i} de {nick}\r\n".encode())
             time.sleep(0.05)
+        
+        # QUIT ordenado
+        s.sendall(f"QUIT :Finalizando test\r\n".encode())
+        s.close()
+    except Exception as e:
+        log(f"Error en hilo {n}: {e}", "FAIL")
 
-    # Part de un canal
-    part_channel(s, CHANNELS[0])
-    time.sleep(0.05)
 
-    # Quedarse en otro canal, opcional leer mensajes
-    read_response(s, 0.05)
+# Ejecución del Plan
 
-    # Quit final
-    quit_client(s)
+if __name__ == "__main__":
+    # 1. Probar comandos parciales primero (esto suele tirar servidores mal hechos)
+    test_partial_commands()
+    
+    time.sleep(1)
 
-# -------------------------
-# Lanzar múltiples clientes
-# -------------------------
-threads = []
-for i in range(NUM_CLIENTS):
-    t = threading.Thread(target=client_thread, args=(i,))
-    threads.append(t)
-    t.start()
-    time.sleep(0.05)  # iniciar ligeramente espaciados
+    # 2. Lanzar mezcla de clientes normales y desconexiones sucias
+    threads = []
+    log("Lanzando ráfaga de clientes concurrentes y cierres sucios...")
+    
+    for i in range(10):
+        if i % 2 == 0:
+            t = threading.Thread(target=client_thread, args=(i,))
+        else:
+            t = threading.Thread(target=test_abrupt_exit, args=(i,))
+        threads.append(t)
+        t.start()
 
-for t in threads:
-    t.join()
+    for t in threads:
+        t.join()
 
-print("[TEST COMPLETO] Todos los clientes se desconectaron.")
+    log("TEST COMPLETO. Revisa Valgrind para asegurar que no hay leaks.", "DONE")

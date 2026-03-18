@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/18 17:04:52 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/18 23:43:30 by pablo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,33 +199,33 @@ void Server::processIncomingData(int fd)
 
 void Server::terminateClientConnection(int fd) 
 {
-	Client* client = _clients[fd];
+    std::map<int, Client*>::iterator it_client = _clients.find(fd);
+    if (it_client == _clients.end())
+        return;
 
-	std::cout << "[DISCONNECT] "
-          << client->getNickname()
-          << " (" << client->getUsername()
-          << "@" << client->getHost() << ")"
-          << std::endl;
-	// Limpieza de canales (Llamada al metodo)
-	// Aquí va la función para sacar al cliente de todos los canales antes de borrarlo
-	this->removeClientFromAllChannels(fd);
+    Client* client = it_client->second;
 
-	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
-	{
-		if (it->fd == fd) {
-			_poll_fds.erase(it);
-			break;
-		}
-	}
+    std::cout << "[DISCONNECT] "
+              << (client->getNickname().empty() ? "Unknown" : client->getNickname())
+              << " (" << client->getUsername() << "@" << client->getHost() << ")"
+              << " en FD: " << fd << std::endl;
 
-	// Cerrar socket
-	close(fd);
-	
-	// Eliminar de la lista de clientes del servidor
-	delete _clients[fd];
-	_clients.erase(fd);
+    this->removeClientFromAllChannels(fd);
 
-	
+    // Importante: erase() invalida el iterador, por eso el break es vital.
+    for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
+    {
+        if (it->fd == fd) 
+        {
+            _poll_fds.erase(it);
+            break; 
+        }
+    }
+
+    close(fd);
+    
+    delete client; 
+    _clients.erase(it_client); 
 }
 
 void Server::stopEngine() 
