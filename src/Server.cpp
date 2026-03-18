@@ -43,7 +43,8 @@ void handleSignal(int signum) {
 Server::Server(int port, std::string password) 
 	: _port(port), _password(password), _server_master_fd(-1), _is_running(false) {}
 
-Server::~Server() {
+Server::~Server() 
+{
 	this->stopEngine();
 }
 
@@ -126,7 +127,8 @@ void Server::run() {
 	this->stopEngine();
 }
 
-void Server::establishNewConnection() {
+void Server::establishNewConnection() 
+{
 	struct sockaddr_in client_addr;
 	socklen_t addr_len = sizeof(client_addr);
 	int new_client_fd = accept(_server_master_fd, (struct sockaddr *)&client_addr, &addr_len);
@@ -225,17 +227,35 @@ void Server::terminateClientConnection(int fd)
 	
 }
 
-void Server::stopEngine() {
-	if (!_is_running && _poll_fds.empty()) // Si ya se cerró, salimos
-		return;
-	_is_running = false;
-	std::cout << "[SHUTDOWN] Limpiando recursos y cerrando descriptores..." << std::endl;
-	for (size_t i = 0; i < _poll_fds.size(); ++i) {
-		close(_poll_fds[i].fd);
-	}
-	_poll_fds.clear();
-	_clients.clear();
-	_server_master_fd = -1; // Marcamos como cerrado, quiza no haga falta, revisar
+void Server::stopEngine() 
+{
+    if (!_is_running && _poll_fds.empty())
+        return;
+
+    _is_running = false;
+    std::cout << "[SHUTDOWN] Limpiando recursos y cerrando descriptores..." << std::endl;
+
+    //  cerrar todos los sockets de clientes
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        close(it->first); 
+        delete it->second;     
+    }
+    _clients.clear();
+
+    // borrar todos los canales
+    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        delete *it;
+    }
+    _channels.clear();
+
+    
+    if (_server_master_fd != -1)
+        close(_server_master_fd);
+    _server_master_fd = -1;
+
+    _poll_fds.clear();
 }
 
 // LÓGICA PARA LOS CHANNELS Y CLIENTES
@@ -277,11 +297,7 @@ Channel* Server::createChannel(const std::string& name, Client* creator)
 	(void)creator; // evita el warning
 
     _channels.push_back(channel);
-    //channel->addClient(creator);
-    //creator->joinChannel(channel);
-    //channel->addOperator(creator);
-    std::cout << "[CHANNEL CREATED] " << name << std::endl;
-
+   
     return channel;
 }
 
@@ -337,17 +353,18 @@ void Server::removeClientFromChannel(Client* client, const std::string& channel_
 
 void Server::removeChannel(const std::string& name)
 {
-	for (size_t i = 0; i < _channels.size(); i++)
-	{
-		if (_channels[i]->getName() == name)
-		{
-			delete _channels[i];
-			_channels.erase(_channels.begin() + i);
+    for (std::vector<Channel*>::iterator it = _channels.begin();
+         it != _channels.end(); ++it)
+    {
+        if ((*it)->getName() == name)
+        {
+            std::cout << "[CHANNEL REMOVED] " << name << std::endl;
 
-			std::cout << "[CHANNEL REMOVED] " << name << std::endl;
-			return;
-		}
-	}
+            delete *it;
+            _channels.erase(it);
+            return;
+        }
+    }
 }
 
 void Server::removeClientFromAllChannels(int fd)
@@ -423,4 +440,27 @@ bool Server::nickExists(const std::string& nick) const
             return true;
     }
     return false;
+}
+
+void Server::disconnectClient(int fd)
+{
+    std::map<int, Client*>::iterator it = _clients.find(fd);
+    if (it == _clients.end())
+        return;
+
+    Client* client = it->second;
+
+    std::cout << "[DISCONNECT] FD: " << fd << std::endl;
+
+    // 1. limpiar canales
+    removeClientFromAllChannels(fd);
+
+    // 2. cerrar socket
+    close(fd);
+
+    // 3. borrar del map
+    _clients.erase(it);
+
+    // 4. liberar memoria
+    delete client;
 }

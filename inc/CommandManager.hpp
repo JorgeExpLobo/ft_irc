@@ -5,7 +5,10 @@
 #include <sys/socket.h>
 #include "ACommand.hpp"
 
+class ACommand;
 class Server;
+class Client;
+class Message;
 
 class CommandManager
 {

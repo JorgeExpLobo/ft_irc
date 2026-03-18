@@ -7,28 +7,40 @@ UserCommand::~UserCommand() {}
 
 void UserCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.getArgCount() < 4)
+    
+    if (client->isRegistered())
     {
-        Message err = Reply::errNeedMoreParams(client->getNickname(), "USER");
-        server->sendToClient(client, err.toString());
+        server->sendToClient(client,
+            Reply::errAlreadyRegistered(client->getNickname()).stringify());
         return;
     }
 
-    client->setUsername(msg.getArg(0));
-    client->tryRegister();
+   
+    if (msg.getArgCount() < 4)
+    {
+        server->sendToClient(client,
+            Reply::errNeedMoreParams(client->getNickname(), "USER").stringify());
+        return;
+    }
 
+    
+    client->setUsername(msg.getArg(0));
+    client->setRealName(msg.suffix());
+
+    
+    client->tryRegister(server);
+
+   
     if (client->isRegistered())
     {
-		std::cout << "[REGISTER] "
-              << "nick=" << client->getNickname()
-              << " user=" << client->getUsername()
-              << " host=" << client->getHost()
-              << std::endl;
-        Message welcome = Reply::welcome(
-            client->getNickname(),
-            client->getUsername(),
-            client->getHost());
+        std::cout << "[REGISTER] "
+                  << "nick=" << client->getNickname()
+                  << " user=" << client->getUsername()
+                  << " realName=" << client->getRealName()
+                  << " host=" << client->getHost()
+                  << std::endl;
 
-        server->sendToClient(client, welcome.toString());
+        server->sendToClient(client, Reply::welcome(client->getNickname(), client->getUsername(), client->getHost()).stringify());
+
     }
 }

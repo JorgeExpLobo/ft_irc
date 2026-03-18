@@ -7,14 +7,15 @@ AwayCommand::~AwayCommand() {}
 
 void AwayCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.suffix().empty())
+    if  (!msg.hasSuffix() || msg.suffix().empty())
     {
         client->removeAway();
-        server->sendToClient(client, Reply::unaway().toString());
+        server->sendToClient(client, Reply::unaway(client->getNickname()).stringify());
     }
     else
     {
         client->setAway(msg.suffix());
-        server->sendToClient(client, Reply::nowAway().toString());
+        server->sendToClient(client, Reply::nowAway(client->getNickname()).stringify());
     }
+
 }

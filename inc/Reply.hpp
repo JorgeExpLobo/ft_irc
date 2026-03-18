@@ -39,9 +39,9 @@ class Reply
     static Message inviting(const std::string &by, const std::string &nickname, const std::string &channel);
 
     // Away
-    static Message away(const std::string &nick, const std::string &awayMessage);
-    static Message unaway();
-    static Message nowAway();
+    static Message away(const std::string &nick, const std::string& target, const std::string &awayMessage);
+    static Message unaway(const std::string& nick);
+    static Message nowAway(const std::string& nick);
 
     // Names
     static Message nameReply(const std::string &nick, const Channel &channel);

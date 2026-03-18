@@ -75,7 +75,7 @@ public:
 	void addClientToChannel(Client* client, const std::string& channel_name);
 	void removeClientFromChannel(Client* client, const std::string& channel_name);
 	void terminateClientConnection(int fd);
-
+	void 	disconnectClient(int fd);
 	// MESSAGE HELPERS
 
 	void sendToClient(Client* client, const std::string& message);

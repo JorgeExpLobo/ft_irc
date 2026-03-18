@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include "../inc/Server.hpp"
 
 // Avoid forward declaration
 class Channel;
@@ -15,6 +16,7 @@ class Client
 		std::string _nickname;
 		std::string _username;
 		std::string _host;
+		std::string _realName;
 
 		bool _has_pass;
 		bool _has_nick;
@@ -40,7 +42,7 @@ class Client
 		void setNickname(const std::string& nick);
 		void setUsername(const std::string& user);
 		void setHasPass(bool value);
-		void tryRegister();
+		void tryRegister(Server* server);
 		bool isRegistered() const;
 
 		void appendBuffer(const std::string& data);
@@ -56,4 +58,6 @@ class Client
 		const std::string& getAwayMessage() const;
 		void setAway(const std::string& msg);
 		void removeAway();
+		void setRealName(const std::string& realName);
+    	const std::string& getRealName() const;
 };

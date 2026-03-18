@@ -1,5 +1,8 @@
 #include "../inc/Client.hpp"
 #include "../inc/Channel.hpp"
+#include "../inc/Server.hpp"
+#include "../inc/Message.hpp"
+#include "../inc/Reply.hpp"
 
 Client::Client() 
 		: _fd(-1),
@@ -49,6 +52,17 @@ const std::string& Client::getHost() const
 	return _host;
 }
 
+void Client::setRealName(const std::string& realName)
+{
+    _realName = realName;
+}
+
+const std::string& Client::getRealName() const
+{
+    return _realName;
+}
+
+
 void Client::setNickname(const std::string& nick)
 {
 	_nickname = nick;
@@ -66,10 +80,29 @@ void Client::setHasPass(bool value)
 	_has_pass = value;
 }
 
-void Client::tryRegister()
+void Client::tryRegister(Server* server)
 {
-	if (_has_pass && _has_nick && _has_user)
-		_registered = true;
+    if (_has_nick && _has_user && _has_pass && !_registered)
+    {
+        _registered = true; 
+
+        std::cout << "[REGISTER] "
+                  << "nick=" << _nickname
+                  << " user=" << _username
+                  << " host=" << _host
+                  << std::endl;
+
+        // Enviar mensaje de bienvenida
+        Message welcome = Reply::welcome(_nickname, _username, _host);
+
+        server->sendToClient(this, welcome.stringify());
+    }
+    else if (!_has_pass)
+    {
+        // Opcional: si intenta registrarse sin pass correcto, mandar warning
+        std::cout << "[WARN] Cliente " << _nickname
+                  << " intentó registrarse sin password correcta." << std::endl;
+    }
 }
 
 bool Client::isRegistered() const
@@ -128,3 +161,5 @@ void Client::removeAway()
 	_away = false;
 	_awayMessage.clear();
 }
+
+

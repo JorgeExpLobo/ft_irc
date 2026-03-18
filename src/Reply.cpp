@@ -88,26 +88,31 @@ Message Reply::inviting(const std::string &nick, const std::string &targetNick, 
 }
 
 // Away
-Message Reply::away(const std::string &nick, const std::string &awayMessage) 
+Message Reply::away(const std::string &nick, const std::string& target, const std::string &awayMessage) 
 {
     Message msg;
-    msg.setPrefix(SERVER_NAME).setReplyCode(301).pushArg(nick);
-    if (!awayMessage.empty())
-        msg.pushSuffix(awayMessage);
+    msg.setPrefix(SERVER_NAME);
+    msg.setCommand("301");
+    msg.pushArg(nick);
+    msg.pushArg(target);
+    msg.pushSuffix(awayMessage);
     return msg;
 }
 
-Message Reply::unaway() 
+Message Reply::unaway(const std::string& nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(305)
+                    .pushArg(nick)
                     .pushSuffix("You are no longer marked as being away");
+                
 }
 
-Message Reply::nowAway() 
+Message Reply::nowAway(const std::string& nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(306)
+                    .pushArg(nick)
                     .pushSuffix("You have been marked as being away");
 }
 

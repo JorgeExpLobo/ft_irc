@@ -13,8 +13,11 @@
 #include "Server.hpp"
 #include <cstdlib> // Para atoi
 
-int main(int argc, char** argv) {
-	if (argc != 3) {
+int main(int argc, char** argv) 
+{
+
+	if (argc != 3)
+	{
 		std::cerr << "Uso: ./ircserv <port> <password>" << std::endl;
 		return 1;
 	}

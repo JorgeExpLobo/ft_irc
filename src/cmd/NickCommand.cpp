@@ -46,5 +46,5 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
             server->sendToClient(other, finalMsg);
     }
 
-    client->tryRegister();
+    client->tryRegister(server);
 }

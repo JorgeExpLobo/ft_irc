@@ -9,8 +9,10 @@ void PassCommand::execute(Server* server, Client* client, const Message& msg)
 {
     if (msg.getArgCount() == 0)
     {
-        Message err = Reply::errNeedMoreParams(client->getNickname(), "PASS");
-        server->sendToClient(client, err.toString());
+        server->sendToClient(
+            client,
+            Reply::errNeedMoreParams(client->getNickname(), "PASS").stringify()
+        );
         return;
     }
 
@@ -18,11 +20,14 @@ void PassCommand::execute(Server* server, Client* client, const Message& msg)
 
     if (pass != server->getPassword())
     {
-        Message err = Reply::errPassWdMissMatch(client->getNickname());
-        server->sendToClient(client, err.toString());
+      
+        server->sendToClient(client, Reply::errPassWdMissMatch(client->getNickname()).stringify());
+        
+        close(client->getFd());
+        server->disconnectClient(client->getFd());
         return;
     }
 
     client->setHasPass(true);
-    client->tryRegister();
+    client->tryRegister(server);
 }
