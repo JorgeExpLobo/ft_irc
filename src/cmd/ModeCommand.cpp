@@ -1,4 +1,4 @@
-#include "cmd/ModeCommand.hpp"
+#include "ModeCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

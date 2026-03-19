@@ -1,4 +1,4 @@
-#include "cmd/NickCommand.hpp"
+#include "NickCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

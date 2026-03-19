@@ -1,4 +1,4 @@
-#include "cmd/PartCommand.hpp"
+#include "PartCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

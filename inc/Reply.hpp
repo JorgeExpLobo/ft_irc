@@ -82,7 +82,7 @@ class Reply
     static Message errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick);
     static Message errKeyset(const std::string &nick, const std::string &channel);
     static Message pong(const std::string &serverName, const std::string &token);
-
+    static Message errNotRegistered(const std::string &nick);
 };
 
 #endif

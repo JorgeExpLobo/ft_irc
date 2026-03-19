@@ -3,7 +3,7 @@
 #include <string>
 #include <set>
 
-// Avoid forward declaration
+
 class Channel;
 class Server;
 

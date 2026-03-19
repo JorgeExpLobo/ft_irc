@@ -1,4 +1,4 @@
-#include "cmd/PingCommand.hpp"
+#include "PingCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

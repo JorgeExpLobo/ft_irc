@@ -3,9 +3,8 @@
 #include <map>
 #include <string>
 #include <sys/socket.h>
-#include "../inc/ACommand.hpp"
+#include "ACommand.hpp"
 
-class ACommand;
 class Server;
 class Client;
 class Message;

@@ -22,7 +22,6 @@
 #define SERVER_NAME "irc.42madrid.com"
 
 
-
 Message Reply::welcome(const std::string &nick, const std::string &user, const std::string &host) 
 {
     return Message().setPrefix(SERVER_NAME)
@@ -402,4 +401,11 @@ Message Reply::pong(const std::string &serverName, const std::string &token)
        .pushArg(serverName)
        .pushSuffix(token);
     return msg;
+}
+Message Reply::errNotRegistered(const std::string &nick) 
+{
+    return Message().setPrefix(SERVER_NAME)
+                    .setReplyCode(451)
+                    .pushArg(nick)
+                    .pushSuffix("You are not Registered");
 }

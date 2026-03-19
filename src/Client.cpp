@@ -1,8 +1,9 @@
-#include "../inc/Client.hpp"
-#include "../inc/Channel.hpp"
-#include "../inc/Server.hpp"
-#include "../inc/Message.hpp"
-#include "../inc/Reply.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
+#include "Message.hpp"
+#include "Reply.hpp"
+
 
 Client::Client() 
 		: _fd(-1),

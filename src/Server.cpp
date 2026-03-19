@@ -10,22 +10,24 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/Server.hpp"
-#include "../inc/CommandManager.hpp"
-#include "../inc/cmd/PassCommand.hpp"
-#include "../inc/cmd/NickCommand.hpp"
-#include "../inc/cmd/UserCommand.hpp"
-#include "../inc/cmd/JoinCommand.hpp"
-#include "../inc/cmd/PartCommand.hpp"
-#include "../inc/cmd/PrivmsgCommand.hpp"
-#include "../inc/cmd/QuitCommand.hpp"
-#include "../inc/cmd/InviteCommand.hpp"
-#include "../inc/cmd/KickCommand.hpp"
-#include "../inc/cmd/TopicCommand.hpp"
-#include "../inc/cmd/ModeCommand.hpp"
-#include "../inc/cmd/AwayCommand.hpp"
-#include "../inc/cmd/PingCommand.hpp"
+#include "Server.hpp"
+#include "CommandManager.hpp"
+#include "PassCommand.hpp"
+#include "NickCommand.hpp"
+#include "UserCommand.hpp"
+#include "JoinCommand.hpp"
+#include "PartCommand.hpp"
+#include "PrivmsgCommand.hpp"
+#include "QuitCommand.hpp"
+#include "InviteCommand.hpp"
+#include "KickCommand.hpp"
+#include "TopicCommand.hpp"
+#include "ModeCommand.hpp"
+#include "AwayCommand.hpp"
+#include "PingCommand.hpp"
 
+#include <cstring>
+#include <iostream>
 #include <cstdio>
 #include <cerrno>
 #include <csignal> // Para manejar señales
@@ -33,8 +35,10 @@
 // Flags globales para control de señales (Estándar en 42)
 bool g_server_shutdown = false;
 
-void handleSignal(int signum) {
-	if (signum == SIGINT) {
+void handleSignal(int signum) 
+{
+	if (signum == SIGINT) 
+	{
 		std::cout << "\n[INFO] Señal SIGINT recibida. Cerrando servidor de forma segura..." << std::endl;
 		g_server_shutdown = true;
 	}
@@ -45,11 +49,11 @@ Server::Server(int port, std::string password)
 
 Server::~Server() 
 {
-	
 	this->stopEngine();
 }
 
-void Server::init() {
+void Server::init() 
+{
 	// Configurar el manejador de señales
 	signal(SIGINT, handleSignal);
 
@@ -101,26 +105,33 @@ void Server::init() {
 	std::cout << "Puerto: " << _port << " | Password: " << _password << std::endl;
 }
 
-void Server::run() {
-	while (_is_running && !g_server_shutdown) {
+void Server::run() 
+{
+	while (_is_running && !g_server_shutdown) 
+	{
 		// Usamos un timeout de 1 segundo para poder checkear g_server_shutdown
 		int poll_count = poll(&_poll_fds[0], _poll_fds.size(), 1000);
 		
-		if (poll_count < 0) {
-			if (g_server_shutdown) break;
+		if (poll_count < 0) 
+		{
+			if (g_server_shutdown) 
+				break;
 			std::cerr << "[ERROR] Error en poll: " << std::strerror(errno) << std::endl;
-			break;
+				break;
 		}
 
-		for (size_t i = 0; i < _poll_fds.size(); ++i) {
-			if (_poll_fds[i].revents & POLLIN) {
+		for (size_t i = 0; i < _poll_fds.size(); ++i) 
+		{
+			if (_poll_fds[i].revents & POLLIN) 
+			{
 				if (_poll_fds[i].fd == _server_master_fd)
 					this->establishNewConnection();
 				else
 					this->processIncomingData(_poll_fds[i].fd);
 			}
 			
-			if (i < _poll_fds.size() && (_poll_fds[i].revents & (POLLERR | POLLHUP))) {
+			if (i < _poll_fds.size() && (_poll_fds[i].revents & (POLLERR | POLLHUP))) 
+			{
 				this->terminateClientConnection(_poll_fds[i].fd);
 			}
 		}
@@ -134,7 +145,8 @@ void Server::establishNewConnection()
 	socklen_t addr_len = sizeof(client_addr);
 	int new_client_fd = accept(_server_master_fd, (struct sockaddr *)&client_addr, &addr_len);
 
-	if (new_client_fd != -1) {
+	if (new_client_fd != -1) 
+	{
 		fcntl(new_client_fd, F_SETFL, O_NONBLOCK);
 		
 		struct pollfd client_pfd;
@@ -158,10 +170,16 @@ void Server::processIncomingData(int fd)
 
 	int bytes_received = recv(fd, read_buffer, sizeof(read_buffer) - 1, 0);
 
-	if (bytes_received <= 0)
+	if (bytes_received == 0)
 	{
 		this->terminateClientConnection(fd);
 		return;
+	}
+	else if (bytes_received < 0)
+	{
+			if (errno != EAGAIN && errno != EWOULDBLOCK)
+				this->terminateClientConnection(fd);
+			return;	
 	}
 
 	read_buffer[bytes_received] = '\0';
@@ -272,8 +290,7 @@ Channel* Server::findChannel(const std::string& name)
 
 Client* Server::findClient(const std::string& nickname)
 {
-    for (std::map<int, Client*>::iterator it = _clients.begin();
-         it != _clients.end(); ++it)
+    for (std::map<int, Client*>::iterator it = _clients.begin();  it != _clients.end(); ++it)
     {
         if (it->second->getNickname() == nickname)
             return it->second;
@@ -398,9 +415,6 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 
 	std::string out = message + "\r\n";
 
-	//std::cout << "[BROADCAST] Channel: " << channel->getName()
-	//          << " Message: " << message << std::endl;
-
 
 	for (std::set<Client*>::const_iterator it = clients.begin();
 		 it != clients.end(); ++it)
@@ -412,11 +426,6 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 
 		if (client->getFd() == exclude_fd)
 			continue;
-
-	//	std::cout << "  -> sending to " 
-	//	          << client->getNickname()
-	//	          << " (fd=" << client->getFd() << ")"
-	//	          << std::endl;
 
 		send(client->getFd(), out.c_str(), out.size(), 0);
 	}

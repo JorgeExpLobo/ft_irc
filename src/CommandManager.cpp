@@ -19,6 +19,17 @@ void CommandManager::execute(Server* server, Client* client, const Message& msg)
 {
 	std::string cmd = msg.command();
 
+	if (!client->isRegistered())
+	{
+		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER")
+		{
+			Message err = Reply::errNotRegistered(client->getNickname());
+			std::string out = err.stringify();
+			send(client->getFd(), out.c_str(), out.size(), 0);
+			return;
+		}
+	}
+
 	std::map<std::string, ACommand*>::iterator it = _commands.find(cmd);
 
 	if (it == _commands.end())

@@ -1,4 +1,4 @@
-#include "cmd/PrivmsgCommand.hpp"
+#include "PrivmsgCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

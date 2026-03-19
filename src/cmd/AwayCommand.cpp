@@ -1,4 +1,4 @@
-#include "cmd/AwayCommand.hpp"
+#include "AwayCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

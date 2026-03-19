@@ -73,7 +73,7 @@ LEAKS_FLAGS				:=	-g #-g3 -fsanitize=address#,leak
 OPTIMIZE_FLAGS			:=	-O3
 PREPROCESS_FLAG			:=	-E
 ASSEMBLY_FLAG			:=	-S
-INC_LIB					:=	-I$(DIR_INC)
+INC_LIB					:=	-I$(DIR_INC) -I$(DIR_INC)cmd
 
 # Debug Flag
 # DEBUG_VALUE			:=	0

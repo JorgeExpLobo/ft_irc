@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/Server.hpp"
+#include "Server.hpp"
 #include <cstdlib> // Para atoi
 
 int main(int argc, char** argv) 

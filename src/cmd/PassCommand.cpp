@@ -1,4 +1,4 @@
-#include "cmd/PassCommand.hpp"
+#include "PassCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

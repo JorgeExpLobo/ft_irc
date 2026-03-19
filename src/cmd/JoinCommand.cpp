@@ -1,4 +1,4 @@
-#include "cmd/JoinCommand.hpp"
+#include "JoinCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 #include "Channel.hpp"

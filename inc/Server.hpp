@@ -13,7 +13,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
+
 # include <vector>
 # include <map>
 # include <string>
@@ -22,8 +22,7 @@
 # include <netinet/in.h>
 # include <fcntl.h>
 # include <unistd.h>
-# include <cstring>
-# include <algorithm>
+#include <algorithm>
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "CommandManager.hpp"
