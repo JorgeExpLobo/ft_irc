@@ -129,3 +129,8 @@ El archivo debe estar en la raíz, escrito en **Inglés** y contener:
 ## 🌟 Bonus (Solo si la parte obligatoria es perfecta)
 * **Transferencia de archivos**.
 * **Creación de un Bot**.
+
+## LINKS
+* https://www.irchelp.org/protocol/rfc/chapter4.html
+* https://datatracker.ietf.org/doc/html/rfc2812
+* https://modern.ircdocs.horse/

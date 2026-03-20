@@ -38,6 +38,7 @@ class Client
 		const std::string& getNickname() const;
 		const std::string& getUsername() const;
 		const std::string& getHost() const;
+		bool getHasPass() const;
 
 		void setNickname(const std::string& nick);
 		void setUsername(const std::string& user);

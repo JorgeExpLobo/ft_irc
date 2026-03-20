@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/18 23:43:30 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/20 10:36:04 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,11 @@ void Server::processIncomingData(int fd)
 	}
 
 	read_buffer[bytes_received] = '\0';
-
+	
+	////////////// PARA TESTEO
+	std::cout << "REDIBIDO recv buffer:\n" << read_buffer << "------" << std::endl;
+	///////////////
+	
 	// Guardamos el cliente antes de procesar
 	Client* client = _clients[fd];
 

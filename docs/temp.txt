@@ -1,0 +1,4 @@
+agrego valor en variables privadas en client para que salga bien el valor de SEND en el log de client
+termino modecommand
+modifico joincommand para las comprobaciones de mode comand
+
