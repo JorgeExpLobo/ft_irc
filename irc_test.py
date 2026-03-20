@@ -42,7 +42,8 @@ def test_partial_commands():
         resp = s.recv(1024).decode()
         if "001" in resp: log("Login exitoso con comandos fragmentados.", "OK")
     except: log("Error: El servidor no procesó el comando fragmentado.", "FAIL")
-    s.close()
+    finally:
+        s.close()
 
 # TEST 2: Desconexión Abrupta (No QUIT)
 
@@ -82,6 +83,67 @@ def client_thread(n):
     except Exception as e:
         log(f"Error en hilo {n}: {e}", "FAIL")
 
+def test_privmsg_errors():
+    log("Iniciando prueba de PRIVMSG y errores...", "PRIVMSG")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
+    s.sendall(f"PASS {PASS}\r\nNICK tester\r\nUSER tester 0 * :tester\r\n".encode())
+    time.sleep(0.2)
+
+    # Sin destinatario
+    s.sendall("PRIVMSG :Hola sin nick\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        if "411" in resp: log("Error 411 recibido correctamente.", "OK")
+    except: log("No se recibió error 411.", "FAIL")
+
+    # Destinatario inexistente
+    s.sendall("PRIVMSG nobody :Hola\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        if "401" in resp: log("Error 401 recibido correctamente.", "OK")
+    except: log("No se recibió error 401.", "FAIL")
+
+    # Mensaje vacío
+    s.sendall("PRIVMSG tester :\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        if "412" in resp or resp == "": log("Error 412 o mensaje vacío manejado.", "OK")
+    except: log("No se manejó correctamente mensaje vacío.", "FAIL")
+
+    s.close()
+
+
+def test_join_part():
+    log("Iniciando prueba de JOIN/PART...", "CHANNEL")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
+    s.sendall(f"PASS {PASS}\r\nNICK chanuser\r\nUSER chanuser 0 * :chanuser\r\n".encode())
+    time.sleep(0.2)
+
+    # JOIN canal
+    s.sendall("JOIN #test\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        if "#test" in resp: log("JOIN correcto.", "OK")
+    except: log("JOIN falló.", "FAIL")
+
+    # JOIN canal inexistente (dependiendo de tu server, podría fallar)
+    s.sendall("JOIN #noexiste\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        log("JOIN a canal inexistente recibido: " + resp.strip(), "INFO")
+    except: pass
+
+    # PART canal
+    s.sendall("PART #test :Adiós\r\n".encode())
+    try:
+        resp = s.recv(1024).decode()
+        if "#test" in resp: log("PART correcto.", "OK")
+    except: log("PART falló.", "FAIL")
+
+    s.close()
+
 
 # Ejecución del Plan
 
@@ -90,6 +152,16 @@ if __name__ == "__main__":
     test_partial_commands()
     
     time.sleep(1)
+
+    # TEST 4
+    test_privmsg_errors()
+    time.sleep(0.5)
+
+    # TEST 5
+    test_join_part()
+    time.sleep(0.5)
+
+
 
     # 2. Lanzar mezcla de clientes normales y desconexiones sucias
     threads = []
