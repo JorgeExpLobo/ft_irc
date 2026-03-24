@@ -22,7 +22,6 @@
 #define SERVER_NAME "irc.42madrid.com"
 
 
-
 Message Reply::welcome(const std::string &nick, const std::string &user, const std::string &host) 
 {
     return Message().setPrefix(SERVER_NAME)
@@ -48,15 +47,6 @@ Message Reply::kill(const std::string &nick, const std::string &msg)
                     .pushSuffix(msg);
 }
 
-// hay que revisar los modos, ya que puede tener 0, 1 o mas parametros
-Message Reply::updateMode(const std::string &nick, const std::string &channel, const std::string update) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setCommand("MODE")
-                    .pushArg(channel)
-                    .pushArg(update)
-                    .pushArg(nick);
-}
 
 // Topic
 Message Reply::noTopic(const std::string &nick, const std::string &channel) 
@@ -88,26 +78,31 @@ Message Reply::inviting(const std::string &nick, const std::string &targetNick, 
 }
 
 // Away
-Message Reply::away(const std::string &nick, const std::string &awayMessage) 
+Message Reply::away(const std::string &nick, const std::string& target, const std::string &awayMessage) 
 {
     Message msg;
-    msg.setPrefix(SERVER_NAME).setReplyCode(301).pushArg(nick);
-    if (!awayMessage.empty())
-        msg.pushSuffix(awayMessage);
+    msg.setPrefix(SERVER_NAME);
+    msg.setCommand("301");
+    msg.pushArg(nick);
+    msg.pushArg(target);
+    msg.pushSuffix(awayMessage);
     return msg;
 }
 
-Message Reply::unaway() 
+Message Reply::unaway(const std::string& nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(305)
+                    .pushArg(nick)
                     .pushSuffix("You are no longer marked as being away");
+                
 }
 
-Message Reply::nowAway() 
+Message Reply::nowAway(const std::string& nick) 
 {
     return Message().setPrefix(SERVER_NAME)
                     .setReplyCode(306)
+                    .pushArg(nick)
                     .pushSuffix("You have been marked as being away");
 }
 
@@ -180,7 +175,7 @@ Message Reply::errUnknownMode(const std::string &nick, const std::string &channe
                     .setReplyCode(472)
                     .pushArg(nick)
                     .pushArg(mode)
-                    .pushSuffix("is unknown mode char to me for " + channel);
+                    .pushSuffix("is unknown mode char for " + channel);
 }
 
 Message Reply::errUnknownCommand(const std::string &nick, const std::string &command)
@@ -227,32 +222,6 @@ Message Reply::errNoSuchNick(const std::string &nick, const std::string &badnick
                     .pushSuffix("No such nick/channel");
 }
 
-Message Reply::errNickCollision(const std::string &nick, const std::string &user, const std::string &host, const std::string &badnick) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(436)
-                    .pushArg(nick)
-                    .pushArg(badnick)
-                    .pushSuffix("Nickname collision KILL from " + user + "@" + host);
-}
-
-Message Reply::errUnavailResource(const std::string &nick, const std::string &target) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(437)
-                    .pushArg(nick)
-                    .pushArg(target)
-                    .pushSuffix("Nick/channel is temporarily unavailable");
-}
-
-Message Reply::errRestricted(const std::string &nick) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(484)
-                    .pushArg(nick)
-                    .pushSuffix("Your connection is restricted!");
-}
-
 Message Reply::errNeedMoreParams(const std::string &nick, const std::string &command)
 {
     return Message().setPrefix(SERVER_NAME)
@@ -269,15 +238,6 @@ Message Reply::errAlreadyRegistered(const std::string &nick)
                     .pushArg(nick)
                     .pushSuffix("Unauthorized command (already registered)");
 }
-
-Message Reply::errNoOrigin(const std::string &nick)
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(409)
-                    .pushArg(nick)
-                    .pushSuffix("No origin specified");
-}
-
 
 Message Reply::errNoSuchChannel(const std::string &nick, const std::string &channel) 
 {
@@ -313,8 +273,6 @@ Message Reply::errBadChannelKey(const std::string &nick,  const std::string &cha
                     .pushArg(channel)
                     .pushSuffix("Cannot join channel (+k)");
 }
-
-
 
 
 Message Reply::errChannelIsFull(const std::string &nick, const std::string &channel) 
@@ -379,16 +337,6 @@ Message Reply::errUserNotInChannel(const std::string &nick, const std::string &c
                     .pushSuffix("They aren't on that channel");
 }
 
-Message Reply::errKeyset(const std::string &nick, const std::string &channel) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(467)
-                    .pushArg(nick)
-                    .pushArg(channel)
-                    .pushSuffix("Channel key already set");
-}
-
-
 Message Reply::pong(const std::string &serverName, const std::string &token)
 {
     Message msg;
@@ -397,4 +345,11 @@ Message Reply::pong(const std::string &serverName, const std::string &token)
        .pushArg(serverName)
        .pushSuffix(token);
     return msg;
+}
+Message Reply::errNotRegistered(const std::string &nick) 
+{
+    return Message().setPrefix(SERVER_NAME)
+                    .setReplyCode(451)
+                    .pushArg(nick)
+                    .pushSuffix("You are not Registered");
 }

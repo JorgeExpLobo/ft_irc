@@ -2,6 +2,7 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
+#include <sstream>
 
 class Server;
 

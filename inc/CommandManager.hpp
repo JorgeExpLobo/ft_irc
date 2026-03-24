@@ -6,6 +6,8 @@
 #include "ACommand.hpp"
 
 class Server;
+class Client;
+class Message;
 
 class CommandManager
 {

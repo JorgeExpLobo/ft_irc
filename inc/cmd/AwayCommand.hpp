@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ACommand.hpp"
+#include "ACommand.hpp"
 
 class AwayCommand : public ACommand
 {

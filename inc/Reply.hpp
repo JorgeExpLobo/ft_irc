@@ -29,8 +29,7 @@ class Reply
     static Message welcome(const std::string &nick, const std::string &user, const std::string &host);
     static Message error(const std::string &msg);
     static Message kill(const std::string &nick, const std::string &msg);
-    static Message updateMode(const std::string &nick, const std::string &channel, const std::string update);
-
+   
     // Topic
     static Message noTopic(const std::string &nick, const std::string &channel);
     static Message topic(const std::string &nick, const std::string &channel, const std::string &topic);
@@ -39,9 +38,9 @@ class Reply
     static Message inviting(const std::string &by, const std::string &nickname, const std::string &channel);
 
     // Away
-    static Message away(const std::string &nick, const std::string &awayMessage);
-    static Message unaway();
-    static Message nowAway();
+    static Message away(const std::string &nick, const std::string& target, const std::string &awayMessage);
+    static Message unaway(const std::string& nick);
+    static Message nowAway(const std::string& nick);
 
     // Names
     static Message nameReply(const std::string &nick, const Channel &channel);
@@ -52,7 +51,7 @@ class Reply
     static Message listEnd(const std::string &nick);
 
     // Mode
-    static Message channelModeIs(const std::string &nick, const std::string &name, const std::string &modes);
+     static Message channelModeIs(const std::string &nick, const std::string &name, const std::string &modes);
 
     // Errores
     static Message errUnknownMode(const std::string &nick, const std::string &channel, const std::string &mode);
@@ -61,12 +60,8 @@ class Reply
     static Message errErroneousNickname(const std::string &nick, const std::string &badnick);
     static Message errNicknameInUse(const std::string &nick, const std::string &badnick);
     static Message errNoSuchNick(const std::string &nick, const std::string &badnick);
-    static Message errNickCollision(const std::string &nick, const std::string &user, const std::string &host, const std::string &badnick);
-    static Message errUnavailResource(const std::string &nick, const std::string &target);
-    static Message errRestricted(const std::string &nick);
     static Message errNeedMoreParams(const std::string &nick, const std::string &command);
     static Message errAlreadyRegistered(const std::string &nick);
-    static Message errNoOrigin(const std::string &nick);
     static Message errPassWdMissMatch(const std::string &nick);
    
     static Message errNoSuchChannel(const std::string &nick, const std::string &channel);
@@ -80,9 +75,8 @@ class Reply
     static Message errCannotSendToChan(const std::string &nick, const std::string &channel);
     static Message errChanOpIsNeeded(const std::string &nick, const std::string &channel);
     static Message errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick);
-    static Message errKeyset(const std::string &nick, const std::string &channel);
     static Message pong(const std::string &serverName, const std::string &token);
-
+    static Message errNotRegistered(const std::string &nick);
 };
 
 #endif

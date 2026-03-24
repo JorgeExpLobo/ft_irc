@@ -1,4 +1,4 @@
-#include "cmd/QuitCommand.hpp"
+#include "QuitCommand.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
 

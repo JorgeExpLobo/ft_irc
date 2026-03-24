@@ -1,4 +1,4 @@
-#include "cmd/KickCommand.hpp"
+#include "KickCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

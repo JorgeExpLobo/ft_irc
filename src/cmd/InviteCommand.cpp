@@ -1,4 +1,4 @@
-#include "cmd/InviteCommand.hpp"
+#include "InviteCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 

@@ -13,12 +13,10 @@
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
-#include <string>       // std::string
-#include <stdint.h>      // uint16_t
-
+#include <string> 
+#include <stdint.h>     
 
 #define SERVER_NAME "irc.42madrid.com"
-
 
 /*
  Clase Message

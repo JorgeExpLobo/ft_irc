@@ -1,4 +1,4 @@
-#include "cmd/TopicCommand.hpp"
+#include "TopicCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 #include <sstream>

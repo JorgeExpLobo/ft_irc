@@ -1,4 +1,4 @@
-#include "cmd/ModeCommand.hpp"
+#include "ModeCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 
@@ -8,110 +8,162 @@ ModeCommand::~ModeCommand() {}
 
 void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.getArgCount() < 1)
-        return;
+	bool error = false;
 
-    std::string target = msg.getArg(0);
+	if (msg.getArgCount() < 1)
+		return;
+	
+	std::string target = msg.getArg(0);
 
-    if (target[0] != '#')
-        return;
+	if (target[0] != '#')
+		return;
 
-    Channel* chan = server->findChannel(target);
-    if (!chan)
-        return;
+	Channel* chan = server->findChannel(target);
+	if (!chan)
+	{
+		server->sendToClient(client, Reply::errNoSuchChannel(client->getNickname(), target).stringify());
+		return;
+	}
 
-    if (msg.getArgCount() == 1)
-    {
-        std::string modes = chan->getModesString();
-        std::string reply = std::string(":") + SERVER_NAME + " 324 " +
-            client->getNickname() + " " + target + " " + modes;
+	if (!chan->hasClient(client))
+	{
+		server->sendToClient(client, Reply::errNotOnChannel(client->getNickname(), target).stringify());
+		return;
+	}
+	
+	if (!chan->isOperator(client))
+	{
+		server->sendToClient(client, Reply::errChanOpIsNeeded(client->getNickname(), target).stringify());
+		return;
+	}
 
-        server->sendToClient(client, reply);
-        return;
-    }
+	if (msg.getArgCount() == 1)
+	{
+		std::string modes = chan->getModesString();
+		std::string reply = std::string(":") + SERVER_NAME + " 324 " +
+			client->getNickname() + " " + target + " " + modes;
 
-    std::string modeStr = msg.getArg(1);
-    bool adding = true;
-    size_t argIndex = 2;
+		server->sendToClient(client, reply);
+		return;
+	}
 
-    for (size_t i = 0; i < modeStr.size(); i++)
-    {
-        char c = modeStr[i];
+	std::string modeStr = msg.getArg(1);
+	bool adding = true;
+	size_t argIndex = 2;
 
-        if (c == '+') { adding = true; continue; }
-        if (c == '-') { adding = false; continue; }
+	for (size_t i = 0; i < modeStr.size(); i++)
+	{
+		char c = modeStr[i];
 
-        switch (c)
-        {
-            case 't':
-                chan->setTopicRestricted(adding);
-                break;
+		if (c == '+') { adding = true; continue; }
+		if (c == '-') { adding = false; continue; }
 
-            case 'i':
-                chan->setInviteOnly(adding);
-                break;
+		switch (c)
+		{
+			case 't':
+				chan->setTopicRestricted(adding);
+				break;
 
-            case 'o':
-            {
-                if (argIndex >= static_cast<size_t>(msg.getArgCount()))
-                    return;
+			case 'i':
+				chan->setInviteOnly(adding);
+				break;
 
-                std::string nick = msg.getArg(argIndex++);
-                Client* targetClient = server->findClient(nick);
-                if (!targetClient)
-                    return;
+			case 'o':
+			{
+				if (argIndex >= static_cast<size_t>(msg.getArgCount()))
+				{
+					server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "MODE").stringify());
+					return;
+				}
+				std::string nick = msg.getArg(argIndex++);
+				Client* targetClient = server->findClient(nick);
+				if (!targetClient)
+				{
+					server->sendToClient(client, Reply::errNoSuchNick(client->getNickname(), nick).stringify());
+					return;
+				}
 
-                if (adding)
-                    chan->addOperator(targetClient);
-                else
-                    chan->removeOperator(targetClient);
+				if (!chan->hasClient(targetClient))
+				{
+					server->sendToClient(client, Reply::errUserNotInChannel(client->getNickname(), chan->getName(), nick).stringify());
+					return;
+				}
 
-                break;
-            }
+				if (adding)
+					chan->addOperator(targetClient);
+				else
+					chan->removeOperator(targetClient);
 
-            case 'k':
-            {
-                if (adding)
-                {
-                    if (argIndex >= static_cast<size_t>(msg.getArgCount()))
-                        return;
+				break;
+			}
 
-                    chan->setKey(msg.getArg(argIndex++));
-                }
-                else
-                {
-                    chan->removeKey();
-                }
-                break;
-            }
+			case 'k':
+			{
+				if (adding)
+				{
+					if (argIndex >= static_cast<size_t>(msg.getArgCount()))
+					{
+						server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "MODE +k").stringify());
+						return;
+					}
+					chan->setKey(msg.getArg(argIndex++));
+				}
+				else
+					chan->removeKey();
+				break;
+			}
 
-            case 'l':
-            {
-                if (adding)
-                {
-                    if (argIndex >= static_cast<size_t>(msg.getArgCount()))
-                        return;
+			case 'l':
+			{
+				if (adding)
+				{
+					if (argIndex >= static_cast<size_t>(msg.getArgCount()))
+					{
+						server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "MODE +l").stringify());
+						return;
+					}
+					std::string limitStr = msg.getArg(argIndex++);
+					int limit = std::atoi(limitStr.c_str());
+					if (limit > 0)
+					{
+						chan->setUserLimit(static_cast<size_t>(limit));
+					}
+					else
+						return;
+				}
+				else
+				{
+					// Si es '-l', simplemente borramos el límite
+					chan->removeUserLimit();
+				}
+				break;
+			}
 
-                    chan->setUserLimit(atoi(msg.getArg(argIndex++).c_str()));
-                }
-                else
-                {
-                    chan->removeUserLimit();
-                }
-                break;
-            }
-        }
-    }
+			 default:
+			{
+				server->sendToClient(client, Reply::errUnknownMode(client->getNickname(), chan->getName(), std::string(1, c)).stringify());
+				error = true;
+			}
 
-    std::string modeMsg = std::string(":") + client->getPrefix() +
-    " MODE " + target + " " + modeStr;
+		}
+	}
 
-        for (size_t i = 2; i < static_cast<size_t>(msg.getArgCount()); i++)
-        {
-            modeMsg += " " + msg.getArg(i);
-        }
+	if (error)
+   		return;
 
+	// Mensaje para el resto del canal (sin clave)
+    std::string publicMsg = ":" + client->getPrefix() +
+        " MODE " + target + " " + modeStr;
 
-    server->broadcastToChannel(chan, modeMsg, client->getFd());
-    server->sendToClient(client, modeMsg);
+    // Mensaje para el usuario que ejecuta el comando (con argumentos completos)
+    std::string privateMsg = publicMsg;
+
+    for (int i = 2; i < msg.getArgCount(); i++)
+        privateMsg += " " + msg.getArg(i);
+
+    // Enviar a todos SIN clave
+    server->broadcastToChannel(chan, publicMsg, client->getFd());
+
+    // Enviar al usuario que ejecutó el comando CON clave
+    server->sendToClient(client, privateMsg);
 }

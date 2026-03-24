@@ -1,4 +1,4 @@
-#include "cmd/UserCommand.hpp"
+#include "UserCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 
@@ -7,28 +7,23 @@ UserCommand::~UserCommand() {}
 
 void UserCommand::execute(Server* server, Client* client, const Message& msg)
 {
+    
+    if (client->isRegistered())
+    {
+        server->sendToClient(client, Reply::errAlreadyRegistered(client->getNickname()).stringify());
+        return;
+    }
+
+   
     if (msg.getArgCount() < 4)
     {
-        Message err = Reply::errNeedMoreParams(client->getNickname(), "USER");
-        server->sendToClient(client, err.toString());
+        server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "USER").stringify());
         return;
     }
 
     client->setUsername(msg.getArg(0));
-    client->tryRegister();
+    client->setRealName(msg.suffix());
 
-    if (client->isRegistered())
-    {
-		std::cout << "[REGISTER] "
-              << "nick=" << client->getNickname()
-              << " user=" << client->getUsername()
-              << " host=" << client->getHost()
-              << std::endl;
-        Message welcome = Reply::welcome(
-            client->getNickname(),
-            client->getUsername(),
-            client->getHost());
+    client->tryRegister(server);
 
-        server->sendToClient(client, welcome.toString());
-    }
 }

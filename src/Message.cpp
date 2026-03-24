@@ -15,8 +15,6 @@
 #include <iomanip>
 
 
-
-
 Message::Message() :
     _prefix(),
     _command(),

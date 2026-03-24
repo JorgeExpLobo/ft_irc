@@ -1,9 +1,29 @@
-#include "cmd/NickCommand.hpp"
+#include "NickCommand.hpp"
 #include "Server.hpp"
 #include "Reply.hpp"
 
 NickCommand::NickCommand() {}
 NickCommand::~NickCommand() {}
+
+
+bool isValidNick(const std::string& nick)
+{
+    if (nick.empty())
+        return false;
+
+    // Debe empezar por letra
+    if (!std::isalpha(nick[0]))
+        return false;
+
+    // El resto: letras, números, guiones o _
+    for (size_t i = 1; i < nick.size(); i++)
+    {
+        if (!std::isalnum(nick[i]) && nick[i] != '-' && nick[i] != '_')
+            return false;
+    }
+
+    return true;
+}
 
 void NickCommand::execute(Server* server, Client* client, const Message& msg)
 {
@@ -15,6 +35,13 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
     }
 
     std::string nick = msg.getArg(0);
+
+    if (!isValidNick(nick))
+    {
+        Message err = Reply::errErroneousNickname(client->getNickname(), nick);
+        server->sendToClient(client, err.stringify());
+        return;
+    }
 
     if (server->nickExists(nick))
     {
@@ -46,5 +73,5 @@ void NickCommand::execute(Server* server, Client* client, const Message& msg)
             server->sendToClient(other, finalMsg);
     }
 
-    client->tryRegister();
+    client->tryRegister(server);
 }
