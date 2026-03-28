@@ -6,7 +6,7 @@
 #    By: pablo <pablo@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/24 19:48:59 by jdiaz-he          #+#    #+#              #
-#    Updated: 2026/03/08 16:08:14 by pablo            ###   ########.fr        #
+#    Updated: 2026/03/28 12:44:57 by pablo            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -73,7 +73,7 @@ LEAKS_FLAGS				:=	-g3 -fsanitize=address#,leak
 OPTIMIZE_FLAGS			:=	-O3
 PREPROCESS_FLAG			:=	-E
 ASSEMBLY_FLAG			:=	-S
-INC_LIB					:=	-I$(DIR_INC)
+INC_LIB					:=	-I$(DIR_INC) -I$(DIR_INC)cmd
 
 # Debug Flag
 # DEBUG_VALUE			:=	0
