@@ -6,7 +6,7 @@
 #    By: pablo <pablo@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/24 19:48:59 by jdiaz-he          #+#    #+#              #
-#    Updated: 2026/03/28 12:44:57 by pablo            ###   ########.fr        #
+#    Updated: 2026/03/28 12:47:11 by pablo            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,7 +69,7 @@ OBJ						:=	$(addprefix $(DIR_OBJ), $(SRC:cpp=o))
 CXX						:=	c++
 CXX_FLAGS				:=	-Wall -Werror -Wextra -std=c++98
 DATA_RACE				:=	#-fsanitize=thread -g3 -pthread
-LEAKS_FLAGS				:=	-g3 -fsanitize=address#,leak
+LEAKS_FLAGS				:=	-g #-g3 -fsanitize=address#,leak
 OPTIMIZE_FLAGS			:=	-O3
 PREPROCESS_FLAG			:=	-E
 ASSEMBLY_FLAG			:=	-S
