@@ -131,7 +131,8 @@ These modes allow basic moderation and access control within channels.
 
 ### IRC Documentation
 
-  https://modern.ircdocs.horse/
+  https://modern.ircdocs.horse
+
   https://datatracker.ietf.org/doc/html/rfc1459
 
 ---
