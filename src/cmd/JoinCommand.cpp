@@ -39,7 +39,7 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
 	// 2. Modo +k (Key / Password)
 	if (chan->hasKey())
 	{
-		// Comprobamos si el usuario ha mandado el password como segundo argumento
+		// We check if the user has sent the password as the second argument
 		std::string providedKey = (msg.getArgCount() > 1) ? msg.getArg(1) : "";
 		if (providedKey != chan->getKey())
 		{
@@ -87,7 +87,6 @@ if (chan->getTopic().empty())
 		server->sendToClient(client,
 			Reply::topic(client->getNickname(), channelName, chan->getTopic()).stringify());
 
-		// RPL_TOPICWHOTIME (333)
 		Message whoTime;
 		std::stringstream ss;
 		ss << chan->getTopicTime();

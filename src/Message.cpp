@@ -65,18 +65,19 @@ static std::string formatShort(unsigned short n)
     return ss.str();
 }
 
-
 /*
-  parseRequest()
-  Parsea un mensaje recibido del cliente.
- Ejemplo:
-  ":nick!user@host PRIVMSG #canal :hola a todos"
- Extrae:
-  prefix  → "nick!user@host"
-  command → "PRIVMSG"
-  args    → ["#canal", "hola a todos"]
- Devuelve true si el formato es válido.
- */
+Parses a message received from the client.
+
+Example:
+":nick!user@host PRIVMSG #channel :hello everyone"
+
+Extracts:
+prefix → "nick!user@host"
+command → "PRIVMSG"
+args → ["#channel", "hello everyone"]
+Returns true if the format is valid.
+
+*/
 bool Message::parseRequest(const std::string &str)
 {
     _isRequest = true;
@@ -95,34 +96,34 @@ bool Message::parseRequest(const std::string &str)
     {
         size_t pos = output.find(" ");
 
-        // Saltar espacios iniciales
+        // Skip spaces
         if (pos == 0)
         {
             output.erase(0, 1);
             continue;
         }
 
-        // Límite de argumentos según RFC (máximo 15)
+        // arg limit (max 15)
         if (_argsCount >= 15)
             return false;
 
         if (pos == std::string::npos)
             pos = output.size();
 
-        // 1. Prefijo
+        // Prefix
         if (output.at(0) == ':' && _prefix.empty() && !commandSet)
         {
             _prefix.assign(output, 1, pos - 1);
         }
 
-        // 2. Comando
+        // 2. Command
         else if (!commandSet)
         {
             _command.assign(output, 0, pos);
             commandSet = true;
         }
 
-        // 3. Sufijo (trailing)
+        // 3. Sufix
         else if (output.at(0) == ':')
         {
             _args[_argsCount] = output.substr(1);
@@ -131,7 +132,7 @@ bool Message::parseRequest(const std::string &str)
             break;
         }
 
-        // 4. Argumento normal
+        // 4. Arg
         else
         {
             _args[_argsCount].assign(output, 0, pos);
@@ -147,31 +148,20 @@ bool Message::parseRequest(const std::string &str)
     return true;
 }
 
-
-
-/*
- stringify()
- Convierte el mensaje en un string IRC válido.
- NO añade "\r\n".
- */
 std::string Message::stringify(void) const
 {
     std::string output;
 
-    // Prefijo opcional
     if (!this->_prefix.empty())
         output += ":" + this->_prefix + " ";
 
-    // Comando textual o código numerico
     if (this->_isRequest)
         output += this->_command;
     else
         output += formatShort(this->_replyCode);
 
-    // Argumentos
     for (size_t i = 0; _argsCount > 0 && i < this->_argsCount; i++)
     {
-        // El último argumento puede ser un sufijo
         if (i == _argsCount - 1 && this->_hasSuffix)
             output += " :" + this->_args[i];
         else
@@ -181,25 +171,11 @@ std::string Message::stringify(void) const
     return output;
 }
 
-
-/*
- setPrefix()
- Establece el prefijo del mensaje.
- - El prefijo debe tener al menos 3 caracteres
-  O empezar por ':'
- evita prefijos inválidos como "" o "a".
- */
 Message &Message::setPrefix(const std::string &prefix)
 {
     this->_prefix = prefix;
     return *this;
 }
-
-
-/*
- setReplyCode()
- Convierte el mensaje en una respuesta numérica IRC.
- */
 
 Message &Message::setReplyCode(uint16_t replyCode)
 {
@@ -208,14 +184,6 @@ Message &Message::setReplyCode(uint16_t replyCode)
     return *this;
 }
 
-
-/*
- pushArg()
- Añade un argumento normal.
- No se puede añadir un argumento después de un sufijo.
- PRIVMSG #canal :hola a todos argumento_extra
- No se pueden tener más de 15 argumentos (RFC).
- */
 Message &Message::pushArg(const std::string &arg)
 {
     if (arg.empty())
@@ -227,14 +195,6 @@ Message &Message::pushArg(const std::string &arg)
     return *this;
 }
 
-
-/*
- pushSuffix()
-  Añade un argumento trailing.
- Solo puede haber un sufijo.
- Ejemplo inválido:
-  PRIVMSG #canal :hola :adios
- */
 Message &Message::pushSuffix(const std::string &arg)
 {
     pushArg(arg);
@@ -242,14 +202,6 @@ Message &Message::pushSuffix(const std::string &arg)
 
     return *this;
 }
-
-
-/*
-  setCommand()
-  Establece el comando textual del mensaje.
-  El comando no puede estar vacío.
- 
- */
 
 Message &Message::setCommand(const std::string &command)
 {
@@ -268,7 +220,6 @@ bool Message::isRequest() const { return _isRequest; }
 bool Message::hasSuffix() const { return _hasSuffix; }
 uint16_t Message::replyCode() const { return _replyCode; }
 
-// Implementación para funciones auxiliares para los comandos
 
 std::string Message::getCommand() const
 {

@@ -38,8 +38,6 @@ void PartCommand::execute(Server* server, Client* client, const Message& msg)
     server->broadcastToChannel(chan, raw, -1);
 
     chan->removeClient(client);
-    client->leaveChannel(chan);
-
-    // si es el ultimmo del canal deberiamos borrar el canal 
+    client->leaveChannel(chan); 
     
 }

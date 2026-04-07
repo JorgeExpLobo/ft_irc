@@ -30,16 +30,15 @@
 #include <iostream>
 #include <cstdio>
 #include <cerrno>
-#include <csignal> // Para manejar señales
+#include <csignal> 
 
-// Flags globales para control de señales (Estándar en 42)
 bool g_server_shutdown = false;
 
 void handleSignal(int signum) 
 {
 	if (signum == SIGINT) 
 	{
-		std::cout << "\n[INFO] Señal SIGINT recibida. Cerrando servidor de forma segura..." << std::endl;
+		std::cout << "\n[INFO] SIGINT signal received. Securely shutting down server..." << std::endl;
 		g_server_shutdown = true;
 	}
 }
@@ -58,15 +57,15 @@ void Server::init()
 	signal(SIGINT, handleSignal);
 
 	_server_master_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_server_master_fd == -1) throw std::runtime_error("Error: No se pudo crear el socket maestro.");
+	if (_server_master_fd == -1) throw std::runtime_error("Error: The master socket could not be created.");
 
 	int opt_reuse = 1;
 	if (setsockopt(_server_master_fd, SOL_SOCKET, SO_REUSEADDR, &opt_reuse, sizeof(opt_reuse)) == -1)
-		throw std::runtime_error("Error: No se pudo configurar SO_REUSEADDR.");
+		throw std::runtime_error("Error: Can not configure SO_REUSEADDR.");
 
 	// OBLIGATORIO: fcntl para modo no bloqueante
 	if (fcntl(_server_master_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Error: fcntl no pudo establecer O_NONBLOCK.");
+		throw std::runtime_error("Error: fcntl could not set O_NONBLOCK.");
 
 	struct sockaddr_in server_address;
 	std::memset(&server_address, 0, sizeof(server_address));
@@ -75,10 +74,10 @@ void Server::init()
 	server_address.sin_port = htons(_port);
 
 	if (bind(_server_master_fd, (struct sockaddr *)&server_address, sizeof(server_address)) == -1)
-		throw std::runtime_error("Error: Bind falló (¿puerto ocupado?).");
+		throw std::runtime_error("Error: Bind failed (port busy?).");
 
 	if (listen(_server_master_fd, 128) == -1)
-		throw std::runtime_error("Error: Listen falló.");
+		throw std::runtime_error("Error: Listen failed.");
 
 	struct pollfd master_pfd;
 	master_pfd.fd = _server_master_fd;
@@ -101,22 +100,22 @@ void Server::init()
 	_commandManager.registerCommand("AWAY", new AwayCommand());
 	_commandManager.registerCommand("PING", new PingCommand());
 	
-	std::cout << "--- Servidor IRC 'The Engine' iniciado ---" << std::endl;
-	std::cout << "Puerto: " << _port << " | Password: " << _password << std::endl;
+	std::cout << "--- IRC server 'The Engine' started ---" << std::endl;
+	std::cout << "Port: " << _port << " | Password: " << _password << std::endl;
 }
 
 void Server::run() 
 {
 	while (_is_running && !g_server_shutdown) 
 	{
-		// Usamos un timeout de 1 segundo para poder checkear g_server_shutdown
+		// We use a timeout of 1 second so we can check g_server_shutdown
 		int poll_count = poll(&_poll_fds[0], _poll_fds.size(), 1000);
 		
 		if (poll_count < 0) 
 		{
 			if (g_server_shutdown) 
 				break;
-			std::cerr << "[ERROR] Error en poll: " << std::strerror(errno) << std::endl;
+			std::cerr << "[ERROR] Error poll: " << std::strerror(errno) << std::endl;
 				break;
 		}
 
@@ -154,12 +153,10 @@ void Server::establishNewConnection()
 		client_pfd.events = POLLIN;
 		client_pfd.revents = 0;
 		_poll_fds.push_back(client_pfd);
-
-		// --- GESTIÓN DE CLIENTE ---
 		
 		Client* new_client = new Client(new_client_fd, "localhost");
 		_clients[new_client_fd] = new_client;
-		std::cout << "[+] Cliente vinculado en FD: " << new_client_fd << std::endl;
+		std::cout << "[+] Client linked in FD: " << new_client_fd << std::endl;
 	}
 }
 
@@ -184,17 +181,17 @@ void Server::processIncomingData(int fd)
 
 	read_buffer[bytes_received] = '\0';
 	
-	////////////// PARA TESTEO
-	std::cout << "REDIBIDO recv buffer:\n" << read_buffer << "------" << std::endl;
+	////////////// TEST
+	//std::cout << "REDIBIDO recv buffer:\n" << read_buffer << "------" << std::endl;
 	///////////////
 	
-	// Guardamos el cliente antes de procesar
+	//  save the client before processing
 	Client* client = _clients[fd];
 
-	// --- GESTIÓN DE BUFFER ---
+	// --- BUFFER MANAGEMENT ---
 	client->appendBuffer(read_buffer);
 
-	// --- PROCESAR COMANDOS ---
+	// --- PROCESS COMMANDS ---
 	std::string& current_buffer = client->getBuffer();
 
 	size_t newline_pos;
@@ -211,7 +208,7 @@ void Server::processIncomingData(int fd)
 
 		_commandManager.execute(this, client, msg);
 
-		// Si el cliente fue eliminado (QUIT, error, etc.), salimos
+		// If the client was removed (QUIT, error, etc.), exit
 		if (_clients.find(fd) == _clients.end())
 			return;
 
@@ -234,7 +231,7 @@ void Server::terminateClientConnection(int fd)
 
     this->removeClientFromAllChannels(fd);
 
-    // Importante: erase() invalida el iterador, por eso el break es vital.
+    // Important: erase() invalidates the iterator, that's why the break is vital.
     for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
     {
         if (it->fd == fd) 
@@ -256,9 +253,9 @@ void Server::stopEngine()
         return;
 
     _is_running = false;
-    std::cout << "[SHUTDOWN] Limpiando recursos y cerrando descriptores..." << std::endl;
+    std::cout << "[SHUTDOWN] Cleaning up resources and closing FDs..." << std::endl;
 
-    //  cerrar todos los sockets de clientes
+    // Close all client sockets
     for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
         close(it->first); 
@@ -266,7 +263,7 @@ void Server::stopEngine()
     }
     _clients.clear();
 
-    // borrar todos los canales
+   // delete all channels
     for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
     {
         delete *it;
@@ -281,7 +278,6 @@ void Server::stopEngine()
     _poll_fds.clear();
 }
 
-// LÓGICA PARA LOS CHANNELS Y CLIENTES
 Channel* Server::findChannel(const std::string& name)
 {
 	for (size_t i = 0; i < _channels.size(); i++)
@@ -316,7 +312,7 @@ Channel* Server::createChannel(const std::string& name, Client* creator)
 {
     Channel* channel = new Channel(name);
 
-	(void)creator; // evita el warning
+	(void)creator;
 
     _channels.push_back(channel);
    
@@ -439,13 +435,13 @@ void Server::sendToClient(Client* client, const std::string& message)
 {
 	std::string out = message + "\r\n";
 
-	//para debug, quitar cuando funcione todo
-	std::cout << "SEND -> " << out << std::endl;
+	//for debug
+	//std::cout << "SEND -> " << out << std::endl;
 
 	send(client->getFd(), out.c_str(), out.size(), 0);
 }
 
-// FUNCIONES AUXILIARES PARA COMANDOS
+
 bool Server::nickExists(const std::string& nick) const
 {
     for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
@@ -466,15 +462,8 @@ void Server::disconnectClient(int fd)
 
     std::cout << "[DISCONNECT] FD: " << fd << std::endl;
 
-    // 1. limpiar canales
     removeClientFromAllChannels(fd);
-
-    // 2. cerrar socket
     close(fd);
-
-    // 3. borrar del map
     _clients.erase(it);
-
-    // 4. liberar memoria
     delete client;
 }

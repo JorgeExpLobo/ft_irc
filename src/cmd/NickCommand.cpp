@@ -11,11 +11,10 @@ bool isValidNick(const std::string& nick)
     if (nick.empty())
         return false;
 
-    // Debe empezar por letra
+    // Must start with a letter
     if (!std::isalpha(nick[0]))
         return false;
 
-    // El resto: letras, números, guiones o _
     for (size_t i = 1; i < nick.size(); i++)
     {
         if (!std::isalnum(nick[i]) && nick[i] != '-' && nick[i] != '_')

@@ -14,7 +14,6 @@ void UserCommand::execute(Server* server, Client* client, const Message& msg)
         return;
     }
 
-   
     if (msg.getArgCount() < 4)
     {
         server->sendToClient(client, Reply::errNeedMoreParams(client->getNickname(), "USER").stringify());
@@ -23,7 +22,6 @@ void UserCommand::execute(Server* server, Client* client, const Message& msg)
 
     client->setUsername(msg.getArg(0));
     client->setRealName(msg.suffix());
-
     client->tryRegister(server);
 
 }

@@ -31,38 +31,36 @@
 class Server 
 {
 private:
-	// TODO: std::string					_name;
 	int							_port;
 	std::string					_password;
 	int							_server_master_fd;
 	bool						_is_running;
 
-	// Gestion de conexiones
+	// Connection Management
 	std::vector<struct pollfd>	_poll_fds;
 	
 	std::map<int, Client*>	_clients;
 	std::vector<Channel*> _channels;
 
-	// Métodos internos (Engine)
+	// Engine
 	void	establishNewConnection();
 	void	processIncomingData(int fd);
 
-	// Gestion del chat IRC
+	// chat IRC
 	void	executeIrcCommand(int fd, std::string cmd_line);
 	void	removeClientFromAllChannels(int fd);
 
-	// Manager de comandos
 	CommandManager _commandManager;
 
 public:
 	Server(int port, std::string password);
 	~Server();
 
-	void	init();			// Configuración inicial
-	void	run();			// Bucle principal (poll)
-	void	stopEngine(); 	// Cierre limpio
+	void	init();
+	void	run()
+	void	stopEngine();
 
-	// Getters básicos (útiles para el CommandHandler si finalmente se hace)
+	// Getters
 	int			getPort() const { return _port; }
 	std::string	getPassword() const { return _password; }
 	const std::map<int, Client*>& getClients() const { return _clients; }
@@ -82,13 +80,13 @@ public:
 	void sendToClient(Client* client, const std::string& message);
 	void broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd);
 
-	// FUNCIONES AUXILIARES PARA COMANDOS
+	//  AUX functions
 	bool nickExists(const std::string& nick) const;
 	Channel* findChannel(const std::string& name);
 	Client* findClient(const std::string& nickname);
 };
 
-// Declaración del handler de señales (va fuera de la clase)
+// signal handler
 void handleSignal(int signum);
 
 #endif

@@ -6,8 +6,6 @@ PrivmsgCommand::PrivmsgCommand() {}
 PrivmsgCommand::~PrivmsgCommand() {}
 
 
-
-
 std::vector<std::string> split(const std::string& str, char delim)
 {
     std::vector<std::string> result;
@@ -54,7 +52,7 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
         std::string raw = out.stringify();
 
-        // CANAL 
+        // CHAN
         if (target[0] == '#')
         {
             Channel* chan = server->findChannel(target);
@@ -75,7 +73,7 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
             server->broadcastToChannel(chan, raw, client->getFd());
         }
-        // USUARIO 
+        // USER 
         else
         {
             Client* dest = server->findClient(target);

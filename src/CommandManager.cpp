@@ -22,11 +22,8 @@ void CommandManager::execute(Server* server, Client* client, const Message& msg)
 
 	if (!client->isRegistered())
 	{
-		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER") // && cmd != "CAP" && cmd != "QUIT")
+		if (cmd != "PASS" && cmd != "NICK" && cmd != "USER") 
 		{
-			// Message err = Reply::errNotRegistered(client->getNickname());
-			// std::string out = err.stringify();
-			// send(client->getFd(), out.c_str(), out.size(), 0);
 			server->sendToClient(client, Reply::errNotRegistered(client->getNickname()).stringify());
 			return;
 		}
@@ -36,9 +33,6 @@ void CommandManager::execute(Server* server, Client* client, const Message& msg)
 
 	if (it == _commands.end())
 	{
-		// Message err = Reply::errUnknownCommand(client->getNickname(), cmd);
-		// std::string out = err.stringify() + "\r\n";
-		// send(client->getFd(), out.c_str(), out.size(), 0);
 		server->sendToClient(client, Reply::errUnknownCommand(client->getNickname(), cmd).stringify());
 		return;
 	}

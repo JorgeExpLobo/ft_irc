@@ -14,10 +14,6 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include <set>
-//:<server> <reply-code> <target> <args...> :<mensaje>
-//:irc.42madrid.com 401 pablgarc usuario :No such nick/channel
-//:irc.42madrid.com 461 pablgarc PRIVMSG :Not enough parameters
-//:irc.42madrid.com 433 pablgarc :Nickname is already in use
 
 #define SERVER_NAME "irc.42madrid.com"
 

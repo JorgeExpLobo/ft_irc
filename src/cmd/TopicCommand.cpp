@@ -45,7 +45,8 @@ void TopicCommand::execute(Server* server, Client* client, const Message& msg)
         return;
     }
 
-    if (/*chan->isTopicRestricted() && */ !chan->isOperator(client)) {
+    if (!chan->isOperator(client)) 
+    {
         server->sendToClient(client, Reply::errChanOpIsNeeded(client->getNickname(), channelName).stringify());
         return;
     }

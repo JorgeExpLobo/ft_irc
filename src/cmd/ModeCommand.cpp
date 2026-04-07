@@ -133,7 +133,6 @@ void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 				}
 				else
 				{
-					// Si es '-l', simplemente borramos el límite
 					chan->removeUserLimit();
 				}
 				break;
@@ -151,19 +150,16 @@ void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 	if (error)
    		return;
 
-	// Mensaje para el resto del canal (sin clave)
+	// Message for the rest of the channel (no password)
     std::string publicMsg = ":" + client->getPrefix() +
         " MODE " + target + " " + modeStr;
 
-    // Mensaje para el usuario que ejecuta el comando (con argumentos completos)
+    // Message for the user executing the command (with full arguments)
     std::string privateMsg = publicMsg;
 
     for (int i = 2; i < msg.getArgCount(); i++)
         privateMsg += " " + msg.getArg(i);
 
-    // Enviar a todos SIN clave
     server->broadcastToChannel(chan, publicMsg, client->getFd());
-
-    // Enviar al usuario que ejecutó el comando CON clave
     server->sendToClient(client, privateMsg);
 }
