@@ -2,6 +2,7 @@
 #include <string>
 #include <set>
 #include <ctime>
+#include "Server.hpp"
 
 class Client;
 
@@ -72,4 +73,5 @@ public:
     void setTopicRestricted(bool b);
 	std::string getModesString() const;
 
+    void notifyQuit(Client& client, Server& server, const std::string& reason);
 };

@@ -1,5 +1,7 @@
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "Message.hpp"
+#include "Server.hpp"
 #include <algorithm>
 
 Channel::Channel(const std::string& name)
@@ -184,4 +186,20 @@ std::string Channel::getModesString() const
     if (_hasUserLimit)    modes += "l";
 
     return modes;
+}
+
+//no more zombies
+void Channel::notifyQuit(Client& client, Server& server, const std::string& reason) {
+    Message quitMsg;
+    quitMsg.setPrefix(client.getPrefix())
+           .setCommand("QUIT")
+           .pushSuffix(reason);
+    std::string rawQuit = quitMsg.stringify();
+
+    const std::set<Client*>& recipients = getClients();
+    for (std::set<Client*>::const_iterator itCli = recipients.begin(); itCli != recipients.end(); ++itCli) {
+        Client* other = *itCli;
+        if (other->getFd() != client.getFd())
+            server.sendToClient(other, rawQuit);
+    }
 }

@@ -6,7 +6,7 @@
 /*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 18:29:50 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/20 10:36:04 by jdiaz-he         ###   ########.fr       */
+/*   Updated: 2026/04/09 20:26:55 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -399,10 +399,12 @@ void Server::removeClientFromAllChannels(int fd)
 
         channel->removeClient(client);
 		client->leaveChannel(channel);
+		
+		channel->notifyQuit(*client, *this, "Client disconnected...");
 
-        if (channel->isEmpty())
-            toDelete.push_back(channel->getName());
-    }
+		if (channel->isEmpty())
+			toDelete.push_back(channel->getName());
+	}
 
     for (size_t i = 0; i < toDelete.size(); i++)
         removeChannel(toDelete[i]);
