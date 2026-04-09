@@ -51,9 +51,7 @@ void KickCommand::execute(Server* server, Client* client, const Message& msg)
     server->sendToClient(target, rawKick); 
     server->broadcastToChannel(chan, rawKick, target->getFd());
 
-   
-    chan->removeClient(target);
-    target->leaveChannel(chan);
+   server->removeClientFromChannel(target, channelName);
 
     std::cout << "[KICK] " << client->getNickname() << " has kicked " << targetNick << " from " << channelName << "\n";
 }

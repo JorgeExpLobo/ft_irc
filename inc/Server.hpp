@@ -57,7 +57,7 @@ public:
 	~Server();
 
 	void	init();
-	void	run()
+	void	run();
 	void	stopEngine();
 
 	// Getters

@@ -37,7 +37,6 @@ void PartCommand::execute(Server* server, Client* client, const Message& msg)
 
     server->broadcastToChannel(chan, raw, -1);
 
-    chan->removeClient(client);
-    client->leaveChannel(chan); 
-    
+    server->removeClientFromChannel(client, channelName);
+
 }
