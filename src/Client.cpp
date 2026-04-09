@@ -169,3 +169,16 @@ void Client::removeAway()
 }
 
 
+
+///
+void Client::appendWriteBuffer(const std::string& data) {
+	_writeBuffer += data;
+}
+
+std::string& Client::getWriteBuffer() {
+	return _writeBuffer;
+}
+
+void Client::clearWriteBuffer(size_t n) {
+	_writeBuffer.erase(0, n);
+}

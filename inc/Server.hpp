@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pablo <pablo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jdiaz-he <jdiaz-he@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 20:29:46 by jdiaz-he          #+#    #+#             */
-/*   Updated: 2026/03/18 17:08:14 by pablo            ###   ########.fr       */
+/*   Updated: 2026/03/20 19:15:32 by jdiaz-he         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,10 @@ public:
 	bool nickExists(const std::string& nick) const;
 	Channel* findChannel(const std::string& name);
 	Client* findClient(const std::string& nickname);
+
+	//par no bloqueante
+	void handleOutgoingData(int fd, size_t poll_idx);
+	
 };
 
 // Declaración del handler de señales (va fuera de la clase)

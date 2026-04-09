@@ -27,6 +27,9 @@ class Client
 
 		bool _away;
 		std::string _awayMessage;
+		///
+		std::string _writeBuffer;
+		
 
 	public:
 		Client();
@@ -61,4 +64,9 @@ class Client
 		void removeAway();
 		void setRealName(const std::string& realName);
     	const std::string& getRealName() const;
+
+		/// 
+		void appendWriteBuffer(const std::string& data);
+		std::string& getWriteBuffer();
+		void clearWriteBuffer(size_t n);
 };
