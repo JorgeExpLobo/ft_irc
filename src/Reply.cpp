@@ -72,6 +72,14 @@ Message Reply::inviting(const std::string &nick, const std::string &targetNick, 
                     .pushArg(targetNick)
                     .pushArg(channel);
 }
+Message Reply::invite(const std::string &inviterNick, const std::string &channel)
+{
+    Message m;
+    m.setPrefix(inviterNick)
+     .setCommand("INVITE")
+     .pushArg(channel);
+    return m;
+}
 
 // Away
 Message Reply::away(const std::string &nick, const std::string& target, const std::string &awayMessage) 

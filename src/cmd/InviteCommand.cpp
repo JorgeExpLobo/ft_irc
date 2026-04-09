@@ -21,6 +21,9 @@ void InviteCommand::execute(Server* server, Client* client, const Message& msg)
 
     chan->invite(target);
 
+    server->sendToClient(target,
+        Reply::invite(client->getPrefix(), channelName).toString());
+
     server->sendToClient(client,
         Reply::inviting(client->getNickname(), nick, channelName).toString());
 }

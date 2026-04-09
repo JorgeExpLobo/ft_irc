@@ -36,6 +36,7 @@ class Reply
 
     // Invite
     static Message inviting(const std::string &by, const std::string &nickname, const std::string &channel);
+    static Message invite(const std::string &inviterNick, const std::string &channel);
 
     // Away
     static Message away(const std::string &nick, const std::string& target, const std::string &awayMessage);
