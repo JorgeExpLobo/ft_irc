@@ -78,6 +78,10 @@ class Reply
     static Message errUserNotInChannel(const std::string &nick, const std::string &channel, const std::string &newnick);
     static Message pong(const std::string &serverName, const std::string &token);
     static Message errNotRegistered(const std::string &nick);
+    static Message errUserOnChannel(const std::string &nick, const std::string &target, const std::string &channel);
+    static Message errChanOPrivsNeeded(const std::string &nick, const std::string &channel);
+    static Message rplInviting(const std::string &nick, const std::string &target, const std::string &channel);
+
 };
 
 #endif

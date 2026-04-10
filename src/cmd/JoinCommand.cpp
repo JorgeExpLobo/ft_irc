@@ -29,34 +29,37 @@ void JoinCommand::execute(Server* server, Client* client, const Message& msg)
 	if (chan->hasClient(client))
 		return;
 
-	// 1. Modo +i (Invite-only)
-	if (chan->isInviteOnly() && !chan->isInvited(client))
-	{
-		server->sendToClient(client, Reply::errInviteOnlyChan(client->getNickname(), channelName).stringify());
-		return;
-	}
+	
+    bool isInvited = chan->isInvited(client);
 
-	// 2. Modo +k (Key / Password)
-	if (chan->hasKey())
-	{
-		// We check if the user has sent the password as the second argument
-		std::string providedKey = (msg.getArgCount() > 1) ? msg.getArg(1) : "";
-		if (providedKey != chan->getKey())
-		{
-			server->sendToClient(client, Reply::errBadChannelKey(client->getNickname(), channelName).stringify());
-			return;
-		}
-	}
+    if (chan->isInviteOnly() && !isInvited)
+    {
+        server->sendToClient(client, Reply::errInviteOnlyChan(client->getNickname(), channelName).stringify());
+        return;
+    }
+    
+    if (!isInvited)
+    {
+        
+        if (chan->hasKey())
+        {
+            std::string providedKey = (msg.getArgCount() > 1) ? msg.getArg(1) : "";
+            if (providedKey != chan->getKey())
+            {
+                server->sendToClient(client, Reply::errBadChannelKey(client->getNickname(), channelName).stringify());
+                return;
+            }
+        }
 
-	// 3. Modo +l (User Limit)
-	if (chan->hasUserLimit())
-	{
-		if (chan->getClientCount() >= chan->getUserLimit())
-		{
-			server->sendToClient(client, Reply::errChannelIsFull(client->getNickname(), channelName).stringify());
-			return;
-		}
-	}
+        if (chan->hasUserLimit())
+        {
+            if (chan->getClientCount() >= chan->getUserLimit())
+            {
+                server->sendToClient(client, Reply::errChannelIsFull(client->getNickname(), channelName).stringify());
+                return;
+            }
+        }
+    }
 
 	chan->addClient(client);
 	client->joinChannel(chan);

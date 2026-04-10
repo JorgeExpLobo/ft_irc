@@ -357,3 +357,31 @@ Message Reply::errNotRegistered(const std::string &nick)
                     .pushArg(nick)
                     .pushSuffix("You are not Registered");
 }
+
+Message Reply::errUserOnChannel(const std::string &nick, const std::string &target, const std::string &channel) 
+{
+    return Message().setPrefix(SERVER_NAME)
+                    .setReplyCode(443)
+                    .pushArg(nick)
+                    .pushArg(target)
+                    .pushArg(channel)
+                    .pushSuffix("is already on channel");
+}
+
+Message Reply::errChanOPrivsNeeded(const std::string &nick, const std::string &channel) 
+{
+    return Message().setPrefix(SERVER_NAME)
+                    .setReplyCode(482)
+                    .pushArg(nick)
+                    .pushArg(channel)
+                    .pushSuffix("You're not channel operator");
+}
+
+Message Reply::rplInviting(const std::string &nick, const std::string &target, const std::string &channel) 
+{
+    return Message().setPrefix(SERVER_NAME)
+                    .setReplyCode(341)
+                    .pushArg(nick)
+                    .pushArg(target)
+                    .pushArg(channel);
+}
