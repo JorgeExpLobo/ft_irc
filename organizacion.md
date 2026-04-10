@@ -28,29 +28,27 @@
 *Cada comando hereda de `ACommand`. Se recomienda un archivo .cpp por comando para evitar conflictos en Git.*
 | Archivo | Comando | Descripción |
 | :--- | :--- | :--- |
-| `Pass.cpp` | `PASS` | Verifica la contraseña del servidor al conectar. |
-| `Nick.cpp` | `NICK` | Establece o cambia el apodo (comprueba duplicados). |
-| `User.cpp` | `USER` | Establece el nombre real y username. |
-| `Join.cpp` | `JOIN` | Entra en canales (crea el canal si no existe). |
-| `Part.cpp` | `PART` | Sale de un canal. |
-| `Privmsg.cpp` | `PRIVMSG` | Envía mensajes a usuarios o canales. |
-| `Quit.cpp` | `QUIT` | Desconecta al usuario y limpia sus rastros. |
-| `Kick.cpp` | `KICK` | (Op) Expulsa a un usuario. |
-| `Invite.cpp` | `INVITE` | (Op) Invita a un usuario a un canal +i. |
-| `Topic.cpp` | `TOPIC` | (Op) Cambia o consulta el tema del canal. |
-| `Mode.cpp` | `MODE` | (Op) Gestiona los 5 modos obligatorios (i, t, k, o, l). |
+| `PassCommand.cpp` | `PASS` | Verifica la contraseña del servidor al conectar. |
+| `NickCommand.cpp` | `NICK` | Establece o cambia el apodo (comprueba duplicados). |
+| `UserCommand.cpp` | `USER` | Establece el nombre real y username. |
+| `JoinCommand.cpp` | `JOIN` | Entra en canales (crea el canal si no existe). |
+| `PartCommand.cpp` | `PART` | Sale de un canal. |
+| `PrivmsgCommand.cpp` | `PRIVMSG` | Envía mensajes a usuarios o canales. |
+| `QuitCommand.cpp` | `QUIT` | Desconecta al usuario y limpia sus rastros. |
+| `KickCommand.cpp` | `KICK` | (Op) Expulsa a un usuario. |
+| `InviteCommand.cpp` | `INVITE` | (Op) Invita a un usuario a un canal +i. |
+| `TopicCommand.cpp` | `TOPIC` | (Op) Cambia o consulta el tema del canal. |
+| `ModeCommand.cpp` | `MODE` | (Op) Gestiona los 5 modos obligatorios (i, t, k, o, l). |
 
 ### 3b. Comandos de Estabilidad e Información (Adicionales)
 *Estos comandos no siempre son obligatorios por el subject, pero son esenciales para que los clientes reales (HexChat, irssi) funcionen sin errores de conexión.*
 
 | Archivo | Comando | Descripción |
 | :--- | :--- | :--- |
-| `Part.cpp` | `PART` | El usuario sale de un canal específico. Es el comando "espejo" de `JOIN`. |
-| `Ping.cpp` | `PING` | El cliente pregunta "¿sigues ahí?". El servidor debe responder inmediatamente. |
-| `Pong.cpp` | `PONG` | Respuesta del servidor al `PING` del cliente para evitar desconexiones por timeout. |
-| `Notice.cpp` | `NOTICE` | Similar a `PRIVMSG` pero no genera respuestas automáticas (evita bucles infinitos). |
-| `Who.cpp` | `WHO` | Devuelve una lista de usuarios. Los clientes lo usan para rellenar la barra lateral de nombres. |
-| `List.cpp` | `LIST` | Enumera los canales disponibles y sus temas (topics). |
+| `PartCommand.cpp` | `PART` | El usuario sale de un canal específico. Es el comando "espejo" de `JOIN`. |
+| `PingCommand.cpp` | `PING` | El cliente pregunta "¿sigues ahí?". El servidor debe responder inmediatamente. |
+| `Dentro de PingCommand.cpp` | `PONG` | Respuesta del servidor al PING del cliente para evitar desconexiones por timeout. |
+| `Dentro de Reply.cpp` | `LIST` | Enumera los canales disponibles y sus temas (topics). |
 
 ---
 
