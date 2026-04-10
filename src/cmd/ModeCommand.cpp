@@ -9,6 +9,7 @@ ModeCommand::~ModeCommand() {}
 void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 {
 	bool error = false;
+	char c = '\0';
 
 	if (msg.getArgCount() < 1)
 		return;
@@ -53,7 +54,7 @@ void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 
 	for (size_t i = 0; i < modeStr.size(); i++)
 	{
-		char c = modeStr[i];
+		c = modeStr[i];
 
 		if (c == '+') { adding = true; continue; }
 		if (c == '-') { adding = false; continue; }
@@ -79,21 +80,19 @@ void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 				Client* targetClient = server->findClient(nick);
 				if (!targetClient)
 				{
-					server->sendToClient(client, Reply::errNoSuchNick(client->getNickname(), nick).stringify());
+					server->sendToClient(client, Reply::errNoSuchNick(client->getNickname(), targetClient->getNickname()).stringify());
 					return;
 				}
 
 				if (!chan->hasClient(targetClient))
 				{
-					server->sendToClient(client, Reply::errUserNotInChannel(client->getNickname(), chan->getName(), nick).stringify());
+					server->sendToClient(client, Reply::errUserNotInChannel(client->getNickname(), chan->getName(), targetClient->getNickname()).stringify());
 					return;
 				}
-
 				if (adding)
 					chan->addOperator(targetClient);
 				else
 					chan->removeOperator(targetClient);
-
 				break;
 			}
 
@@ -149,17 +148,17 @@ void ModeCommand::execute(Server* server, Client* client, const Message& msg)
 
 	if (error)
    		return;
-
-	// Message for the rest of the channel (no password)
     std::string publicMsg = ":" + client->getPrefix() +
         " MODE " + target + " " + modeStr;
-
-    // Message for the user executing the command (with full arguments)
     std::string privateMsg = publicMsg;
 
-    for (int i = 2; i < msg.getArgCount(); i++)
-        privateMsg += " " + msg.getArg(i);
+    for (int i = 2; i < msg.getArgCount(); i++){
+		privateMsg += " " + msg.getArg(i);
+	}
+	if (c == 'k')
+    	server->broadcastToChannel(chan, publicMsg, client->getFd());
+	else
+    	server->broadcastToChannel(chan, privateMsg, client->getFd());
 
-    server->broadcastToChannel(chan, publicMsg, client->getFd());
     server->sendToClient(client, privateMsg);
 }

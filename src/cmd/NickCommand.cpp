@@ -11,7 +11,6 @@ bool isValidNick(const std::string& nick)
 	if (nick.empty())
 		return false;
 
-	// Must start with a letter
 	if (!std::isalpha(nick[0]))
 		return false;
 

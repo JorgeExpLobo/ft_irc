@@ -14,7 +14,6 @@
 #include <sstream>
 #include <iomanip>
 
-
 Message::Message() :
     _prefix(),
     _command(),
@@ -95,35 +94,25 @@ bool Message::parseRequest(const std::string &str)
     while (!output.empty())
     {
         size_t pos = output.find(" ");
-
-        // Skip spaces
         if (pos == 0)
         {
             output.erase(0, 1);
             continue;
         }
-
-        // arg limit (max 15)
         if (_argsCount >= 15)
             return false;
 
         if (pos == std::string::npos)
             pos = output.size();
-
-        // Prefix
         if (output.at(0) == ':' && _prefix.empty() && !commandSet)
         {
             _prefix.assign(output, 1, pos - 1);
         }
-
-        // 2. Command
         else if (!commandSet)
         {
             _command.assign(output, 0, pos);
             commandSet = true;
         }
-
-        // 3. Sufix
         else if (output.at(0) == ':')
         {
             _args[_argsCount] = output.substr(1);
@@ -131,14 +120,11 @@ bool Message::parseRequest(const std::string &str)
             _hasSuffix = true;
             break;
         }
-
-        // 4. Arg
         else
         {
             _args[_argsCount].assign(output, 0, pos);
             _argsCount += 1;
         }
-
         output.erase(0, pos + 1);
     }
 

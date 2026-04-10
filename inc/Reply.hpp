@@ -30,31 +30,31 @@ class Reply
     static Message error(const std::string &msg);
     static Message kill(const std::string &nick, const std::string &msg);
    
-    // Topic
+    /* Topic */
     static Message noTopic(const std::string &nick, const std::string &channel);
     static Message topic(const std::string &nick, const std::string &channel, const std::string &topic);
 
-    // Invite
+    /* Invite */
     static Message inviting(const std::string &by, const std::string &nickname, const std::string &channel);
     static Message invite(const std::string &inviterNick,const std::string &targetNick, const std::string &channel);
 
-    // Away
+    /* Away */
     static Message away(const std::string &nick, const std::string& target, const std::string &awayMessage);
     static Message unaway(const std::string& nick);
     static Message nowAway(const std::string& nick);
 
-    // Names
+    /* Names */
     static Message nameReply(const std::string &nick, const Channel &channel);
     static Message endOfNames(const std::string &nick, const std::string &channel);
 
-    // List
+    /* List */
     static Message list(const std::string &nick, const std::string &name, const std::string &nusers, const std::string &topic);
     static Message listEnd(const std::string &nick);
 
-    // Mode
+    /* Mode */
      static Message channelModeIs(const std::string &nick, const std::string &name, const std::string &modes);
 
-    // Errores
+    /* Errores */
     static Message errUnknownMode(const std::string &nick, const std::string &channel, const std::string &mode);
     static Message errUnknownCommand(const std::string &nick, const std::string &command);
     static Message errNoNicknameGiven(const std::string &nick);

@@ -52,7 +52,6 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
         std::string raw = out.stringify();
 
-        // CHAN
         if (target[0] == '#')
         {
             Channel* chan = server->findChannel(target);
@@ -73,7 +72,6 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
             server->broadcastToChannel(chan, raw, client->getFd());
         }
-        // USER 
         else
         {
             Client* dest = server->findClient(target);
@@ -87,7 +85,6 @@ void PrivmsgCommand::execute(Server* server, Client* client, const Message& msg)
 
             server->sendToClient(dest, raw);
 
-            // AWAY
             if (dest->isAway())
             {
                 server->sendToClient(client, Reply::away(client->getNickname(),dest->getNickname(), dest->getAwayMessage()).stringify());

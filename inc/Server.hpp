@@ -13,7 +13,6 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-
 # include <vector>
 # include <map>
 # include <string>
@@ -36,18 +35,18 @@ private:
 	int							_server_master_fd;
 	bool						_is_running;
 
-	// Connection Management
+	/* Connection Management */
 	std::vector<struct pollfd>	_poll_fds;
 	
 	std::map<int, Client*>	_clients;
 	std::map<std::string, Client*> _clientsByNick;
 	std::vector<Channel*> _channels;
 
-	// Engine
+	/* Engine */
 	void	establishNewConnection();
 	void	processIncomingData(int fd);
 
-	// chat IRC
+	/* chat IRC */
 	void	executeIrcCommand(int fd, std::string cmd_line);
 	void	removeClientFromAllChannels(int fd);
 
@@ -61,12 +60,12 @@ public:
 	void	run();
 	void	stopEngine();
 
-	// Getters
+	/* Getters */
 	int			getPort() const { return _port; }
 	std::string	getPassword() const { return _password; }
 	const std::map<int, Client*>& getClients() const { return _clients; }
 
-	// CHANNEL MANAGEMENT
+	/* CHANNEL MANAGEMENT */
 
 	Channel* getChannel(const std::string& name);
 	const std::vector<Channel*>& getChannels() const;
@@ -76,12 +75,12 @@ public:
 	void addClientToChannel(Client* client, const std::string& channel_name);
 	void removeClientFromChannel(Client* client, const std::string& channel_name);
 	void terminateClientConnection(int fd);
-	// MESSAGE HELPERS
+	/* MESSAGE HELPERS */
 
 	void sendToClient(Client* client, const std::string& message);
 	void broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd);
 
-	//  AUX functions
+	/*  AUX functions */
 	bool nickExists(const std::string& nick) const;
 	void addNick(const std::string& nick, Client* client);
 	void removeNick(const std::string& nick);
@@ -89,7 +88,7 @@ public:
 	Client* findClient(const std::string& nickname);
 };
 
-// signal handler
+/* signal handler */
 void handleSignal(int signum);
 
 #endif

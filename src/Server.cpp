@@ -109,7 +109,6 @@ void Server::run()
 {
 	while (_is_running && !g_server_shutdown) 
 	{
-		// We use a timeout of 1 second so we can check g_server_shutdown
 		int poll_count = poll(&_poll_fds[0], _poll_fds.size(), 1000);
 		
 		if (poll_count < 0) 
@@ -183,21 +182,11 @@ void Server::processIncomingData(int fd)
 	}
 
 	read_buffer[bytes_received] = '\0';
-	
-	////////////// TEST
-	//std::cout << "REDIBIDO recv buffer:\n" << read_buffer << "------" << std::endl;
-	///////////////
-	
-	//  save the client before processing
 	std::map<int, Client*>::iterator itClient = _clients.find(fd);
 	if (itClient == _clients.end())
 		return;
 	Client* client = itClient->second;
-
-	// --- BUFFER MANAGEMENT ---
 	client->appendBuffer(read_buffer);
-
-	// --- PROCESS COMMANDS ---
 	std::string& current_buffer = client->getBuffer();
 
 	size_t newline_pos;
@@ -214,7 +203,6 @@ void Server::processIncomingData(int fd)
 
 		_commandManager.execute(this, client, msg);
 
-		// If the client was removed (QUIT, error, etc.), exit
 		if (_clients.find(fd) == _clients.end())
 			return;
 
@@ -240,7 +228,6 @@ void Server::terminateClientConnection(int fd)
 
 	this->removeClientFromAllChannels(fd);
 
-	// Important: erase() invalidates the iterator, that's why the break is vital.
 	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
 	{
 		if (it->fd == fd) 
@@ -264,15 +251,12 @@ void Server::stopEngine()
 	_is_running = false;
 	std::cout << "[SHUTDOWN] Cleaning up resources and closing FDs..." << std::endl;
 
-	// Close all client sockets
 	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		close(it->first); 
 		delete it->second;     
 	}
 	_clients.clear();
-
-   // delete all channels
 	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		delete *it;
@@ -460,10 +444,6 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 void Server::sendToClient(Client* client, const std::string& message)
 {
 	std::string out = message + "\r\n";
-
-	//for debug
-	//std::cout << "SEND -> " << out << std::endl;
-
 	ssize_t sent = send(client->getFd(), out.c_str(), out.size(), 0);
 	if (sent < 0)
 	{

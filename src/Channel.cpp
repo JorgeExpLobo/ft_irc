@@ -188,7 +188,6 @@ std::string Channel::getModesString() const
 	return modes;
 }
 
-//no more zombies
 void Channel::notifyQuit(Client& client, Server& server, const std::string& reason) {
 	Message quitMsg;
 	quitMsg.setPrefix(client.getPrefix())

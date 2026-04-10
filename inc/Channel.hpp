@@ -16,11 +16,11 @@ private:
     std::set<Client*> _operators;
     std::set<Client*> _invited;
 
-    bool _inviteOnly;      // MODE +i
-    bool _topicRestricted; // MODE +t
-    bool _hasKey;          // MODE +k
+    bool _inviteOnly;
+    bool _topicRestricted;
+    bool _hasKey; 
     std::string _key;
-    bool _hasUserLimit;    // MODE +l
+    bool _hasUserLimit;
     size_t _userLimit;
 
     std::string _topicSetter;
