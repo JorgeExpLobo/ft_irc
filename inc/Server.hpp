@@ -40,6 +40,7 @@ private:
 	std::vector<struct pollfd>	_poll_fds;
 	
 	std::map<int, Client*>	_clients;
+	std::map<std::string, Client*> _clientsByNick;
 	std::vector<Channel*> _channels;
 
 	// Engine
@@ -74,7 +75,6 @@ public:
 	void addClientToChannel(Client* client, const std::string& channel_name);
 	void removeClientFromChannel(Client* client, const std::string& channel_name);
 	void terminateClientConnection(int fd);
-	void 	disconnectClient(int fd);
 	// MESSAGE HELPERS
 
 	void sendToClient(Client* client, const std::string& message);
@@ -82,6 +82,8 @@ public:
 
 	//  AUX functions
 	bool nickExists(const std::string& nick) const;
+	void addNick(const std::string& nick, Client* client);
+	void removeNick(const std::string& nick);
 	Channel* findChannel(const std::string& name);
 	Client* findClient(const std::string& nickname);
 };

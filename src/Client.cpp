@@ -95,20 +95,16 @@ bool Client::getHasPass() const
 
 void Client::tryRegister(Server* server)
 {
-	if (_has_nick && _has_user && _has_pass && !_registered)
-	{
-		_registered = true; 
-
-		Message welcome = Reply::welcome(_nickname, _username, _host);
-
-		server->sendToClient(this, welcome.stringify());
-	}
-	else if (!_has_pass)
-	{
-
-		std::cout << "[WARN] Cliente " << _nickname
-				  << " password incorrecto" << std::endl;
-	}
+    if (isRegistered())
+        return;
+    if (!hasPass())
+        return;
+    if (getNickname().empty())
+        return;
+    if (!hasUser())
+        return;
+    setRegistered(true);
+    server->sendToClient(this, Reply::rplWelcome(getNickname(), getUsername(), getHost()).stringify());
 }
 
 bool Client::isRegistered() const

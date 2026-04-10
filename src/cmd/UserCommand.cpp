@@ -22,6 +22,6 @@ void UserCommand::execute(Server* server, Client* client, const Message& msg)
 
     client->setUsername(msg.getArg(0));
     client->setRealName(msg.suffix());
+    client->setHasUser(true);
     client->tryRegister(server);
-
 }

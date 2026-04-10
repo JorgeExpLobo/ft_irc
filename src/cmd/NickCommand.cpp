@@ -8,69 +8,74 @@ NickCommand::~NickCommand() {}
 
 bool isValidNick(const std::string& nick)
 {
-    if (nick.empty())
-        return false;
+	if (nick.empty())
+		return false;
 
-    // Must start with a letter
-    if (!std::isalpha(nick[0]))
-        return false;
+	// Must start with a letter
+	if (!std::isalpha(nick[0]))
+		return false;
 
-    for (size_t i = 1; i < nick.size(); i++)
-    {
-        if (!std::isalnum(nick[i]) && nick[i] != '-' && nick[i] != '_')
-            return false;
-    }
+	for (size_t i = 1; i < nick.size(); i++)
+	{
+		if (!std::isalnum(nick[i]) && nick[i] != '-' && nick[i] != '_')
+			return false;
+	}
 
-    return true;
+	return true;
 }
 
 void NickCommand::execute(Server* server, Client* client, const Message& msg)
 {
-    if (msg.getArgCount() == 0)
-    {
-        Message err = Reply::errNoNicknameGiven(client->getNickname());
-        server->sendToClient(client, err.stringify());
-        return;
-    }
+	if (msg.getArgCount() == 0)
+	{
+		Message err = Reply::errNoNicknameGiven(client->getNickname());
+		server->sendToClient(client, err.stringify());
+		return;
+	}
 
-    std::string nick = msg.getArg(0);
+	std::string nick = msg.getArg(0);
 
-    if (!isValidNick(nick))
-    {
-        Message err = Reply::errErroneousNickname(client->getNickname(), nick);
-        server->sendToClient(client, err.stringify());
-        return;
-    }
+	if (client->getNickname() == nick)
+		return;
 
-    if (server->nickExists(nick))
-    {
-        Message err = Reply::errNicknameInUse(client->getNickname(), nick);
-        server->sendToClient(client, err.stringify());
-        return;
-    }
+	if (!isValidNick(nick))
+	{
+		Message err = Reply::errErroneousNickname(client->getNickname(), nick);
+		server->sendToClient(client, err.stringify());
+		return;
+	}
 
-    std::string oldNick = client->getNickname();
+	if (server->nickExists(nick))
+	{
+		Message err = Reply::errNicknameInUse(client->getNickname(), nick);
+		server->sendToClient(client, err.stringify());
+		return;
+	}
 
-    client->setNickname(nick);
+	std::string oldNick = client->getNickname();
 
-    std::cout << "[NICK CHANGE] " << oldNick << " -> " << nick << std::endl;
+	if (!oldNick.empty() && oldNick != "*")
+    	server->removeNick(oldNick);
+	client->setNickname(nick);
+	server->addNick(nick, client);
 
-    Message nickUpdate;
-    nickUpdate.setPrefix(oldNick + "!" + client->getUsername() + "@" + client->getHost())
-              .setCommand("NICK")
-              .pushSuffix(nick);
+	std::cout << "[NICK CHANGE] " << oldNick << " -> " << nick << std::endl;
 
-    std::string finalMsg = nickUpdate.stringify();
+	Message nickUpdate;
+	nickUpdate.setPrefix(oldNick + "!" + client->getUsername() + "@" + client->getHost())
+			  .setCommand("NICK")
+			  .pushSuffix(nick);
 
-    server->sendToClient(client, finalMsg);
+	std::string finalMsg = nickUpdate.stringify();
 
-    const std::map<int, Client*>& clients = server->getClients();
-    for (std::map<int, Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)
-    {
-        Client* other = it->second;
-        if (other != client)
-            server->sendToClient(other, finalMsg);
-    }
+	server->sendToClient(client, finalMsg);
 
-    client->tryRegister(server);
+	const std::set<Channel*>& channels = client->getChannels();
+
+	for (std::set<Channel*>::const_iterator it = channels.begin(); it != channels.end(); ++it)
+	{
+		server->broadcastToChannel(*it, finalMsg, client->getFd());
+	}
+
+	client->tryRegister(server);
 }

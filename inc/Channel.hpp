@@ -14,6 +14,7 @@ private:
     std::string _topic;
     std::set<Client*> _clients;
     std::set<Client*> _operators;
+    std::set<Client*> _invited;
 
     bool _inviteOnly;      // MODE +i
     bool _topicRestricted; // MODE +t
@@ -24,8 +25,6 @@ private:
 
     std::string _topicSetter;
     time_t _topicTime;
-
-    std::set<Client*> _invited;
 
 public:
 

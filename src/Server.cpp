@@ -119,19 +119,21 @@ void Server::run()
 				break;
 		}
 
-		for (size_t i = 0; i < _poll_fds.size(); ++i) 
+		for (size_t i = 0; i < _poll_fds.size(); ++i)
 		{
-			if (_poll_fds[i].revents & POLLIN) 
+			int current_fd = _poll_fds[i].fd;
+
+			if (_poll_fds[i].revents & POLLIN)
 			{
-				if (_poll_fds[i].fd == _server_master_fd)
+				if (current_fd == _server_master_fd)
 					this->establishNewConnection();
 				else
-					this->processIncomingData(_poll_fds[i].fd);
+					this->processIncomingData(current_fd);
 			}
-			
-			if (i < _poll_fds.size() && (_poll_fds[i].revents & (POLLERR | POLLHUP))) 
+			if (i < _poll_fds.size() && (_poll_fds[i].revents & (POLLERR | POLLHUP)))
 			{
-				this->terminateClientConnection(_poll_fds[i].fd);
+				this->terminateClientConnection(current_fd);
+				--i;
 			}
 		}
 	}
@@ -186,7 +188,10 @@ void Server::processIncomingData(int fd)
 	///////////////
 	
 	//  save the client before processing
-	Client* client = _clients[fd];
+	std::map<int, Client*>::iterator itClient = _clients.find(fd);
+	if (itClient == _clients.end())
+		return;
+	Client* client = itClient->second;
 
 	// --- BUFFER MANAGEMENT ---
 	client->appendBuffer(read_buffer);
@@ -218,64 +223,67 @@ void Server::processIncomingData(int fd)
 
 void Server::terminateClientConnection(int fd) 
 {
-    std::map<int, Client*>::iterator it_client = _clients.find(fd);
-    if (it_client == _clients.end())
-        return;
+	std::map<int, Client*>::iterator it_client = _clients.find(fd);
+	if (it_client == _clients.end())
+		return;
 
-    Client* client = it_client->second;
+	Client* client = it_client->second;
+	std::string nick = client->getNickname();
+	if (!nick.empty() && nick != "*")
+		removeNick(nick);
 
-    std::cout << "[DISCONNECT] "
-              << (client->getNickname().empty() ? "Unknown" : client->getNickname())
-              << " (" << client->getUsername() << "@" << client->getHost() << ")"
-              << " en FD: " << fd << std::endl;
+	std::cout << "[DISCONNECT] "
+			  << (client->getNickname().empty() ? "Unknown" : client->getNickname())
+			  << " (" << client->getUsername() << "@" << client->getHost() << ")"
+			  << " en FD: " << fd << std::endl;
 
-    this->removeClientFromAllChannels(fd);
+	this->removeClientFromAllChannels(fd);
 
-    // Important: erase() invalidates the iterator, that's why the break is vital.
-    for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
-    {
-        if (it->fd == fd) 
-        {
-            _poll_fds.erase(it);
-            break; 
-        }
-    }
+	// Important: erase() invalidates the iterator, that's why the break is vital.
+	for (std::vector<struct pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
+	{
+		if (it->fd == fd) 
+		{
+			_poll_fds.erase(it);
+			break; 
+		}
+	}
 
-    close(fd);
-    
-    delete client; 
-    _clients.erase(it_client); 
+	close(fd);
+	
+	_clients.erase(it_client);
+	delete client;
 }
 
 void Server::stopEngine() 
 {
-    if (!_is_running && _poll_fds.empty())
-        return;
+	if (!_is_running && _poll_fds.empty())
+		return;
 
-    _is_running = false;
-    std::cout << "[SHUTDOWN] Cleaning up resources and closing FDs..." << std::endl;
+	_is_running = false;
+	std::cout << "[SHUTDOWN] Cleaning up resources and closing FDs..." << std::endl;
 
-    // Close all client sockets
-    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
-        close(it->first); 
-        delete it->second;     
-    }
-    _clients.clear();
+	// Close all client sockets
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		close(it->first); 
+		delete it->second;     
+	}
+	_clients.clear();
 
    // delete all channels
-    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-    {
-        delete *it;
-    }
-    _channels.clear();
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		delete *it;
+	}
+	_channels.clear();
 
-    
-    if (_server_master_fd != -1)
-        close(_server_master_fd);
-    _server_master_fd = -1;
+	
+	if (_server_master_fd != -1)
+		close(_server_master_fd);
+	_server_master_fd = -1;
 
-    _poll_fds.clear();
+	_poll_fds.clear();
 }
 
 Channel* Server::findChannel(const std::string& name)
@@ -290,43 +298,43 @@ Channel* Server::findChannel(const std::string& name)
 
 Client* Server::findClient(const std::string& nickname)
 {
-    for (std::map<int, Client*>::iterator it = _clients.begin();  it != _clients.end(); ++it)
-    {
-        if (it->second->getNickname() == nickname)
-            return it->second;
-    }
-    return NULL;
+	for (std::map<int, Client*>::iterator it = _clients.begin();  it != _clients.end(); ++it)
+	{
+		if (it->second->getNickname() == nickname)
+			return it->second;
+	}
+	return NULL;
 }
 
 Channel* Server::getChannel(const std::string& name)
 {
-    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-    {
-        if ((*it)->getName() == name)
-            return *it;
-    }
-    return NULL;
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if ((*it)->getName() == name)
+			return *it;
+	}
+	return NULL;
 }
 
 Channel* Server::createChannel(const std::string& name, Client* creator)
 {
-    Channel* channel = new Channel(name);
+	Channel* channel = new Channel(name);
 
 	(void)creator;
 
-    _channels.push_back(channel);
+	_channels.push_back(channel);
    
-    return channel;
+	return channel;
 }
 
 Channel* Server::getOrCreateChannel(const std::string& name, Client* creator)
 {
-    for (size_t i = 0; i < _channels.size(); i++)
-    {
-        if (_channels[i]->getName() == name)
-            return _channels[i];
-    }
-    return createChannel(name, creator);
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i]->getName() == name)
+			return _channels[i];
+	}
+	return createChannel(name, creator);
 }
 
 void Server::addClientToChannel(Client* client, const std::string& channel_name)
@@ -371,33 +379,36 @@ void Server::removeClientFromChannel(Client* client, const std::string& channel_
 
 void Server::removeChannel(const std::string& name)
 {
-    for (std::vector<Channel*>::iterator it = _channels.begin();
-         it != _channels.end(); ++it)
-    {
-        if ((*it)->getName() == name)
-        {
-            std::cout << "[CHANNEL REMOVED] " << name << std::endl;
+	for (std::vector<Channel*>::iterator it = _channels.begin();
+		 it != _channels.end(); ++it)
+	{
+		if ((*it)->getName() == name)
+		{
+			std::cout << "[CHANNEL REMOVED] " << name << std::endl;
 
-            delete *it;
-            _channels.erase(it);
-            return;
-        }
-    }
+			delete *it;
+			_channels.erase(it);
+			return;
+		}
+	}
 }
 
 void Server::removeClientFromAllChannels(int fd)
 {
-    Client* client = _clients[fd];
+	std::map<int, Client*>::iterator itClient = _clients.find(fd);
+	if (itClient == _clients.end())
+		return;
+	Client* client = itClient->second;
 
-    std::set<Channel*> channels = client->getChannels();
-    std::vector<std::string> toDelete;
+	std::set<Channel*> channels = client->getChannels();
+	std::vector<std::string> toDelete;
 
-    for (std::set<Channel*>::iterator it = channels.begin();
-         it != channels.end(); ++it)
-    {
-        Channel* channel = *it;
+	for (std::set<Channel*>::iterator it = channels.begin();
+		 it != channels.end(); ++it)
+	{
+		Channel* channel = *it;
 
-        channel->removeClient(client);
+		channel->removeClient(client);
 		client->leaveChannel(channel);
 		
 		channel->notifyQuit(*client, *this, "Client disconnected...");
@@ -406,9 +417,9 @@ void Server::removeClientFromAllChannels(int fd)
 			toDelete.push_back(channel->getName());
 	}
 
-    for (size_t i = 0; i < toDelete.size(); i++)
-        removeChannel(toDelete[i]);
-    std::cout << "[CLEANUP] Removed client from all channels" << std::endl;
+	for (size_t i = 0; i < toDelete.size(); i++)
+		removeChannel(toDelete[i]);
+	std::cout << "[CLEANUP] Removed client from all channels" << std::endl;
 }
 
 void Server::broadcastToChannel(Channel* channel, const std::string& message, int exclude_fd)
@@ -422,14 +433,21 @@ void Server::broadcastToChannel(Channel* channel, const std::string& message, in
 		 it != clients.end(); ++it)
 	{
 		Client* client = *it;
-
 		if (!client)
+			continue;
+
+		if (_clients.find(client->getFd()) == _clients.end())
 			continue;
 
 		if (client->getFd() == exclude_fd)
 			continue;
 
-		send(client->getFd(), out.c_str(), out.size(), 0);
+		ssize_t sent = send(client->getFd(), out.c_str(), out.size(), 0);
+		if (sent < 0)
+		{
+			if (errno != EAGAIN && errno != EWOULDBLOCK)
+				terminateClientConnection(client->getFd());
+		}
 	}
 }
 
@@ -440,32 +458,31 @@ void Server::sendToClient(Client* client, const std::string& message)
 	//for debug
 	//std::cout << "SEND -> " << out << std::endl;
 
-	send(client->getFd(), out.c_str(), out.size(), 0);
+	ssize_t sent = send(client->getFd(), out.c_str(), out.size(), 0);
+	if (sent < 0)
+	{
+		if (errno == EPIPE)
+		{
+			terminateClientConnection(client->getFd());
+			return;
+		}
+		if (errno != EAGAIN && errno != EWOULDBLOCK)
+			terminateClientConnection(client->getFd());
+	}
 }
 
 
 bool Server::nickExists(const std::string& nick) const
 {
-    for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
-        if (it->second->getNickname() == nick)
-            return true;
-    }
-    return false;
+	return _clientsByNick.find(nick) != _clientsByNick.end();
 }
 
-void Server::disconnectClient(int fd)
+void Server::addNick(const std::string& nick, Client* client)
 {
-    std::map<int, Client*>::iterator it = _clients.find(fd);
-    if (it == _clients.end())
-        return;
+	_clientsByNick[nick] = client;
+}
 
-    Client* client = it->second;
-
-    std::cout << "[DISCONNECT] FD: " << fd << std::endl;
-
-    removeClientFromAllChannels(fd);
-    close(fd);
-    _clients.erase(it);
-    delete client;
+void Server::removeNick(const std::string& nick)
+{
+	_clientsByNick.erase(nick);
 }

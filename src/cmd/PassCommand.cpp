@@ -20,11 +20,10 @@ void PassCommand::execute(Server* server, Client* client, const Message& msg)
 
     if (pass != server->getPassword())
     {
-      
-        server->sendToClient(client, Reply::errPassWdMissMatch(client->getNickname()).stringify());
-        
-        close(client->getFd());
-        server->disconnectClient(client->getFd());
+        client->setHasPass(false);
+        server->sendToClient(client,
+            Reply::errPassWdMissMatch(client->getNickname()).stringify());
+
         return;
     }
 
