@@ -43,8 +43,10 @@ class Client
 		void setNickname(const std::string& nick);
 		void setUsername(const std::string& user);
 		void setHasPass(bool value);
+		void setHasUser(bool value);
 		void tryRegister(Server* server);
 		bool isRegistered() const;
+		void setRegistered(bool value);
 
 		void appendBuffer(const std::string& data);
 		std::string& getBuffer();

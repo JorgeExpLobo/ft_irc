@@ -61,7 +61,8 @@ SRC						:=	main.cpp \
 							cmd/TopicCommand.cpp \
 							cmd/ModeCommand.cpp \
 							cmd/AwayCommand.cpp \
-							cmd/PingCommand.cpp
+							cmd/PingCommand.cpp \
+							cmd/ListCommand.cpp
 
 OBJ						:=	$(addprefix $(DIR_OBJ), $(SRC:cpp=o))
 

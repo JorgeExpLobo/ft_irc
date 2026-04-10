@@ -48,7 +48,7 @@
 | `PartCommand.cpp` | `PART` | El usuario sale de un canal específico. Es el comando "espejo" de `JOIN`. |
 | `PingCommand.cpp` | `PING` | El cliente pregunta "¿sigues ahí?". El servidor debe responder inmediatamente. |
 | `Dentro de PingCommand.cpp` | `PONG` | Respuesta del servidor al PING del cliente para evitar desconexiones por timeout. |
-| `Dentro de Reply.cpp` | `LIST` | Enumera los canales disponibles y sus temas (topics). |
+| `ListCommand.cpp` | `LIST` | Enumera los canales disponibles y sus temas (topics). |
 
 ---
 

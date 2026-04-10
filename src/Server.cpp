@@ -25,6 +25,7 @@
 #include "ModeCommand.hpp"
 #include "AwayCommand.hpp"
 #include "PingCommand.hpp"
+#include "ListCommand.hpp"
 
 #include <cstring>
 #include <iostream>
@@ -99,6 +100,7 @@ void Server::init()
 	_commandManager.registerCommand("MODE", new ModeCommand());
 	_commandManager.registerCommand("AWAY", new AwayCommand());
 	_commandManager.registerCommand("PING", new PingCommand());
+	_commandManager.registerCommand("LIST", new ListCommand());
 	
 	std::cout << "--- IRC server 'The Engine' started ---" << std::endl;
 	std::cout << "Port: " << _port << " | Password: " << _password << std::endl;
@@ -314,6 +316,11 @@ Channel* Server::getChannel(const std::string& name)
 			return *it;
 	}
 	return NULL;
+}
+
+const std::vector<Channel*>& Server::getChannels() const
+{
+    return _channels;
 }
 
 Channel* Server::createChannel(const std::string& name, Client* creator)

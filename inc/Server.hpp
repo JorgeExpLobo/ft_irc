@@ -69,6 +69,7 @@ public:
 	// CHANNEL MANAGEMENT
 
 	Channel* getChannel(const std::string& name);
+	const std::vector<Channel*>& getChannels() const;
 	Channel* createChannel(const std::string& name, Client* creator);
 	Channel* getOrCreateChannel(const std::string& name, Client* creator);
 	void removeChannel(const std::string& name);

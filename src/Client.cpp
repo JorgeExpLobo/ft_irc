@@ -83,6 +83,11 @@ void Client::setUsername(const std::string& user)
 	_has_user = true;
 }
 
+void Client::setHasUser(bool value)
+{
+	_has_user = value;
+}
+
 void Client::setHasPass(bool value)
 {
 	_has_pass = value;
@@ -93,18 +98,23 @@ bool Client::getHasPass() const
 	return _has_pass;
 }
 
+void Client::setRegistered(bool value)
+{
+    _registered = value;
+}
+
 void Client::tryRegister(Server* server)
 {
     if (isRegistered())
         return;
-    if (!hasPass())
+    if (!_has_pass)
         return;
     if (getNickname().empty())
         return;
-    if (!hasUser())
+    if (!_has_user)
         return;
     setRegistered(true);
-    server->sendToClient(this, Reply::rplWelcome(getNickname(), getUsername(), getHost()).stringify());
+    server->sendToClient(this, Reply::welcome(getNickname(), getUsername(), getHost()).stringify());
 }
 
 bool Client::isRegistered() const
