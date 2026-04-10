@@ -72,11 +72,12 @@ Message Reply::inviting(const std::string &nick, const std::string &targetNick, 
                     .pushArg(targetNick)
                     .pushArg(channel);
 }
-Message Reply::invite(const std::string &inviterNick, const std::string &channel)
+Message Reply::invite(const std::string &inviterNick, const std::string &targetNick, const std::string &channel)
 {
-    Message m;
+     Message m;
     m.setPrefix(inviterNick)
      .setCommand("INVITE")
+     .pushArg(targetNick)
      .pushArg(channel);
     return m;
 }
@@ -375,13 +376,4 @@ Message Reply::errChanOPrivsNeeded(const std::string &nick, const std::string &c
                     .pushArg(nick)
                     .pushArg(channel)
                     .pushSuffix("You're not channel operator");
-}
-
-Message Reply::rplInviting(const std::string &nick, const std::string &target, const std::string &channel) 
-{
-    return Message().setPrefix(SERVER_NAME)
-                    .setReplyCode(341)
-                    .pushArg(nick)
-                    .pushArg(target)
-                    .pushArg(channel);
 }

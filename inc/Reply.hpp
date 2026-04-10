@@ -36,7 +36,7 @@ class Reply
 
     // Invite
     static Message inviting(const std::string &by, const std::string &nickname, const std::string &channel);
-    static Message invite(const std::string &inviterNick, const std::string &channel);
+    static Message invite(const std::string &inviterNick,const std::string &targetNick, const std::string &channel);
 
     // Away
     static Message away(const std::string &nick, const std::string& target, const std::string &awayMessage);
@@ -80,8 +80,7 @@ class Reply
     static Message errNotRegistered(const std::string &nick);
     static Message errUserOnChannel(const std::string &nick, const std::string &target, const std::string &channel);
     static Message errChanOPrivsNeeded(const std::string &nick, const std::string &channel);
-    static Message rplInviting(const std::string &nick, const std::string &target, const std::string &channel);
-
+   
 };
 
 #endif

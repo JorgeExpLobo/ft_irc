@@ -44,7 +44,7 @@ void InviteCommand::execute(Server* server, Client* client, const Message& msg)
     chan->invite(target);
 
     server->sendToClient(target,
-        Reply::invite(client->getPrefix(), channelName).stringify());
+        Reply::invite(client->getPrefix(), nick,  channelName).stringify());
 
     server->sendToClient(client,
         Reply::inviting(client->getNickname(), nick, channelName).stringify());

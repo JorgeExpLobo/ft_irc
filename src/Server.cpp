@@ -54,7 +54,7 @@ Server::~Server()
 
 void Server::init() 
 {
-	// Configurar el manejador de señales
+	
 	signal(SIGINT, handleSignal);
 
 	_server_master_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,7 +64,6 @@ void Server::init()
 	if (setsockopt(_server_master_fd, SOL_SOCKET, SO_REUSEADDR, &opt_reuse, sizeof(opt_reuse)) == -1)
 		throw std::runtime_error("Error: Can not configure SO_REUSEADDR.");
 
-	// OBLIGATORIO: fcntl para modo no bloqueante
 	if (fcntl(_server_master_fd, F_SETFL, O_NONBLOCK) == -1)
 		throw std::runtime_error("Error: fcntl could not set O_NONBLOCK.");
 
